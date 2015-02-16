@@ -278,7 +278,11 @@ trait Metable
     public function __get($attr)
     {
         $getter = 'get' . ucfirst($attr);
-        if ( method_exists($this, $getter) ) {
+
+        // leave model relation methods for parent::
+        $isRelationship = method_exists($this, $attr);
+
+        if ( method_exists($this, $getter) && ! $isRelationship ) {
             return $this->{$getter}();
         }
 
