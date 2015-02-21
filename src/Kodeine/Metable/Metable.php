@@ -153,7 +153,7 @@ trait Metable
 
     protected function getModelStub()
     {
-        $model = \App::make('\Kodeine\Metable\MetaData', func_get_args());
+        $model = new \Kodeine\Metable\MetaData(func_get_args());
         $model->setTable($this->metaTable);
 
         return $model;
