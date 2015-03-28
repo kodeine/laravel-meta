@@ -153,8 +153,14 @@ trait Metable
 
     protected function getModelStub()
     {
-        $model = new \Kodeine\Metable\MetaData(func_get_args());
+        // get new meta model instance
+        $model = new \Kodeine\Metable\MetaData();
         $model->setTable($this->metaTable);
+
+        // model fill with attributes.
+        if (func_num_args() > 0) {
+            array_filter(func_get_args(), array($model, 'fill'));
+        }
 
         return $model;
     }
