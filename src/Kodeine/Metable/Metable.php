@@ -15,7 +15,7 @@ trait Metable
     {
         $setMeta = 'setMeta' . ucfirst(gettype($key));
 
-        return $this->$setMeta(strtolower($key), $value);
+        return $this->$setMeta($key, $value);
     }
 
     protected function setMetaString($key, $value)
@@ -27,7 +27,7 @@ trait Metable
         }
 
         return $this->metaData[$key] = $this->getModelStub([
-            'key'   => $key,
+            'key'   => strtolower($key),
             'value' => $value
         ]);
     }
