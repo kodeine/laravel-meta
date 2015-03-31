@@ -297,15 +297,6 @@ trait Metable
 
     public function __set($key, $value)
     {
-        // Check if exists in database and populate Model columns
-        if ( ! $this->exists) {
-            if ( \Schema::hasColumn($this->getTable(), $key) ) {
-                parent::setAttribute($key, $value);
-            }
-
-            return;
-        }
-
         // ignore the trait properties being set.
         if ( starts_with($key, 'meta') || $key == 'query' ) {
             $this->$key = $value;
@@ -332,10 +323,10 @@ trait Metable
         }
 
         // if model table has the column named to the key
-        /*if ( \Schema::hasColumn($this->getTable(), $key) ) {
+        if ( \Schema::hasColumn($this->getTable(), $key) ) {
             parent::setAttribute($key, $value);
             return;
-        }*/
+        }
 
         // key doesn't belong to model, lets create a new meta relationship
         //if ( ! is_null($value) ) {
