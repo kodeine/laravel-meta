@@ -323,10 +323,10 @@ trait Metable
         }
 
         // if model table has the column named to the key
-        /*if ( \Schema::hasColumn($this->getTable(), $key) ) {
+        if ( \Schema::hasColumn($this->getTable(), $key) ) {
             parent::setAttribute($key, $value);
             return;
-        }*/
+        }
 
         // key doesn't belong to model, lets create a new meta relationship
         //if ( ! is_null($value) ) {
