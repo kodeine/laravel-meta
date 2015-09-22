@@ -21,6 +21,10 @@ trait Metable
     protected function setMetaString($key, $value)
     {
         if ( $this->metaData->has($key) ) {
+
+            // Make sure deletion marker is not set
+            $this->metaData[$key]->markForDeletion(false);
+
             $this->metaData[$key]->value = $value;
 
             return $this->metaData[$key];
