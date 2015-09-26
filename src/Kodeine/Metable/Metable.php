@@ -323,8 +323,7 @@ trait Metable
             return;
         }
 
-        // if the key has a custom attribute setter and wasn't 
-        // a model attribute we'll execute it here
+        // if the key has a mutator execute it
         $mutator = camel_case('set_' . $key . '_meta');
 
         if ( method_exists($this, $mutator) ) {
