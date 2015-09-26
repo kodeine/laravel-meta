@@ -290,7 +290,7 @@ trait Metable
         // Check for meta accessor
         $accessor = camel_case('get_' . $attr . '_meta');
 
-        if ( method_exists($this, $accessor)) {
+        if ( method_exists($this, $accessor) ) {
             return $this->{$accessor}();
         }
 
