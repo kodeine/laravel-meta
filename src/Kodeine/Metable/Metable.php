@@ -287,6 +287,14 @@ trait Metable
 
     public function __get($attr)
     {
+        // Check for meta accessor
+        $accessor = camel_case('get_' . $attr . '_meta');
+
+        if ( method_exists($this, $accessor) ) {
+            return $this->{$accessor}();
+        }
+
+        // Check for legacy getter
         $getter = 'get' . ucfirst($attr);
 
         // leave model relation methods for parent::
@@ -312,6 +320,14 @@ trait Metable
         if ( array_key_exists($key, parent::getAttributes()) ) {
             parent::setAttribute($key, $value);
 
+            return;
+        }
+
+        // if the key has a mutator execute it
+        $mutator = camel_case('set_' . $key . '_meta');
+
+        if ( method_exists($this, $mutator) ) {
+            $this->{$mutator}($value);
             return;
         }
 
