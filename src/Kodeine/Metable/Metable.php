@@ -20,6 +20,7 @@ trait Metable
 
     protected function setMetaString($key, $value)
     {
+        $key = strtolower($key);
         if ( $this->metaData->has($key) ) {
 
             // Make sure deletion marker is not set
@@ -31,7 +32,7 @@ trait Metable
         }
 
         return $this->metaData[$key] = $this->getModelStub([
-            'key'   => strtolower($key),
+            'key'   => $key,
             'value' => $value
         ]);
     }
@@ -62,6 +63,7 @@ trait Metable
 
     protected function unsetMetaString($key)
     {
+        $key = strtolower($key);
         if ( $this->metaData->has($key) ) {
             $this->metaData[$key]->markForDeletion();
         }
@@ -72,6 +74,7 @@ trait Metable
         list($keys) = func_get_args();
 
         foreach ($keys as $key) {
+            $key = strtolower($key);
             $this->unsetMetaString($key);
         }
     }
