@@ -1,5 +1,6 @@
-<?php namespace Kodeine\Metable;
+<?php
 
+namespace Kodeine\Metable;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as BaseCollection;
@@ -8,12 +9,11 @@ trait Metable
 {
     /**
      * Set Meta Data functions
-     * -------------------------
+     * -------------------------.
      */
-
-    function setMeta($key, $value = null)
+    public function setMeta($key, $value = null)
     {
-        $setMeta = 'setMeta' . ucfirst(gettype($key));
+        $setMeta = 'setMeta'.ucfirst(gettype($key));
 
         return $this->$setMeta($key, $value);
     }
@@ -21,7 +21,7 @@ trait Metable
     protected function setMetaString($key, $value)
     {
         $key = strtolower($key);
-        if ( $this->metaData->has($key) ) {
+        if ($this->metaData->has($key)) {
 
             // Make sure deletion marker is not set
             $this->metaData[$key]->markForDeletion(false);
@@ -33,7 +33,7 @@ trait Metable
 
         return $this->metaData[$key] = $this->getModelStub([
             'key'   => $key,
-            'value' => $value
+            'value' => $value,
         ]);
     }
 
@@ -46,17 +46,16 @@ trait Metable
         }
 
         return $this->metaData->sortByDesc('id')
-            ->take(sizeof($metas));
+            ->take(count($metas));
     }
 
     /**
      * Unset Meta Data functions
-     * -------------------------
+     * -------------------------.
      */
-
-    function unsetMeta($key)
+    public function unsetMeta($key)
     {
-        $unsetMeta = 'unsetMeta' . ucfirst(gettype($key));
+        $unsetMeta = 'unsetMeta'.ucfirst(gettype($key));
 
         return $this->$unsetMeta($key);
     }
@@ -64,7 +63,7 @@ trait Metable
     protected function unsetMetaString($key)
     {
         $key = strtolower($key);
-        if ( $this->metaData->has($key) ) {
+        if ($this->metaData->has($key)) {
             $this->metaData[$key]->markForDeletion();
         }
     }
@@ -81,16 +80,15 @@ trait Metable
 
     /**
      * Get Meta Data functions
-     * -------------------------
+     * -------------------------.
      */
-
-    function getMeta($key = null, $raw = false)
+    public function getMeta($key = null, $raw = false)
     {
-        if ( is_string($key) && preg_match('/[,|]/is', $key, $m) ) {
+        if (is_string($key) && preg_match('/[,|]/is', $key, $m)) {
             $key = preg_split('/ ?[,|] ?/', $key);
         }
 
-        $getMeta = 'getMeta' . ucfirst(strtolower(gettype($key)));
+        $getMeta = 'getMeta'.ucfirst(strtolower(gettype($key)));
 
         return $this->$getMeta($key, $raw);
     }
@@ -99,8 +97,9 @@ trait Metable
     {
         $meta = $this->metaData->get($key, null);
 
-        if ( is_null($meta) || $meta->isMarkedForDeletion() )
-            return null;
+        if (is_null($meta) || $meta->isMarkedForDeletion()) {
+            return;
+        }
 
         return ($raw) ? $meta : $meta->value;
     }
@@ -110,7 +109,7 @@ trait Metable
         $collection = new BaseCollection();
 
         foreach ($this->metaData as $meta) {
-            if ( ! $meta->isMarkedForDeletion() && in_array($meta->key, $keys) ) {
+            if (!$meta->isMarkedForDeletion() && in_array($meta->key, $keys)) {
                 $collection->put($meta->key, $raw ? $meta : $meta->value);
             }
         }
@@ -125,7 +124,7 @@ trait Metable
         $collection = new BaseCollection();
 
         foreach ($this->metaData as $meta) {
-            if ( ! $meta->isMarkedForDeletion() ) {
+            if (!$meta->isMarkedForDeletion()) {
                 $collection->put($meta->key, $raw ? $meta : $meta->value);
             }
         }
@@ -135,9 +134,8 @@ trait Metable
 
     /**
      * Query Meta Table functions
-     * -------------------------
+     * -------------------------.
      */
-
     public function whereMeta($key, $value)
     {
         return $this->getModelStub()
@@ -148,9 +146,8 @@ trait Metable
 
     /**
      * Trait specific functions
-     * -------------------------
+     * -------------------------.
      */
-
     protected function setObserver()
     {
         $this->saved(function ($model) {
@@ -166,7 +163,7 @@ trait Metable
 
         // model fill with attributes.
         if (func_num_args() > 0) {
-            array_filter(func_get_args(), array($model, 'fill'));
+            array_filter(func_get_args(), [$model, 'fill']);
         }
 
         return $model;
@@ -175,15 +172,14 @@ trait Metable
     protected function saveMeta()
     {
         foreach ($this->metaData as $meta) {
-
             $meta->setTable($this->metaTable);
 
-            if ( $meta->isMarkedForDeletion() ) {
+            if ($meta->isMarkedForDeletion()) {
                 $meta->delete();
                 continue;
             }
 
-            if ( $meta->isDirty() ) {
+            if ($meta->isDirty()) {
                 // set meta and model relation id's into meta table.
                 $meta->setAttribute($this->metaKeyName, $this->modelKey);
                 $meta->save();
@@ -193,16 +189,15 @@ trait Metable
 
     protected function getMetaData()
     {
-        if ( ! isset($this->metaLoaded) ) {
-
+        if (!isset($this->metaLoaded)) {
             $this->setObserver();
 
-            if ( $this->exists ) {
+            if ($this->exists) {
                 $objects = $this->getModelStub()
                     ->where($this->metaKeyName, $this->modelKey)
                     ->get();
 
-                if ( ! is_null($objects) ) {
+                if (!is_null($objects)) {
                     $this->metaLoaded = true;
 
                     return $this->metaData = $objects->keyBy('key');
@@ -215,7 +210,7 @@ trait Metable
     }
 
     /**
-     * Return the key for the model
+     * Return the key for the model.
      *
      * @return string
      */
@@ -225,7 +220,7 @@ trait Metable
     }
 
     /**
-     * Return the foreign key name for the meta table
+     * Return the foreign key name for the meta table.
      *
      * @return string
      */
@@ -235,13 +230,13 @@ trait Metable
     }
 
     /**
-     * Return the table name
+     * Return the table name.
      *
      * @return null
      */
     protected function getMetaTable()
     {
-        return isset($this->metaTable) ? $this->metaTable : $this->getTable() . '_meta';
+        return isset($this->metaTable) ? $this->metaTable : $this->getTable().'_meta';
     }
 
     /**
@@ -258,19 +253,20 @@ trait Metable
 
     /**
      * Model Override functions
-     * -------------------------
+     * -------------------------.
      */
 
     /**
      * Get an attribute from the model.
      *
-     * @param  string $key
+     * @param string $key
+     *
      * @return mixed
      */
     public function getAttribute($key)
     {
         // parent call first.
-        if ( ($attr = parent::getAttribute($key)) !== null ) {
+        if (($attr = parent::getAttribute($key)) !== null) {
             return $attr;
         }
 
@@ -291,19 +287,19 @@ trait Metable
     public function __get($attr)
     {
         // Check for meta accessor
-        $accessor = camel_case('get_' . $attr . '_meta');
+        $accessor = camel_case('get_'.$attr.'_meta');
 
-        if ( method_exists($this, $accessor) ) {
+        if (method_exists($this, $accessor)) {
             return $this->{$accessor}();
         }
 
         // Check for legacy getter
-        $getter = 'get' . ucfirst($attr);
+        $getter = 'get'.ucfirst($attr);
 
         // leave model relation methods for parent::
         $isRelationship = method_exists($this, $attr);
 
-        if ( method_exists($this, $getter) && ! $isRelationship ) {
+        if (method_exists($this, $getter) && !$isRelationship) {
             return $this->{$getter}();
         }
 
@@ -313,29 +309,30 @@ trait Metable
     public function __set($key, $value)
     {
         // ignore the trait properties being set.
-        if ( starts_with($key, 'meta') || $key == 'query' ) {
+        if (starts_with($key, 'meta') || $key == 'query') {
             $this->$key = $value;
 
             return;
         }
 
         // if key is a model attribute, set as is
-        if ( array_key_exists($key, parent::getAttributes()) ) {
+        if (array_key_exists($key, parent::getAttributes())) {
             parent::setAttribute($key, $value);
 
             return;
         }
 
         // if the key has a mutator execute it
-        $mutator = camel_case('set_' . $key . '_meta');
+        $mutator = camel_case('set_'.$key.'_meta');
 
-        if ( method_exists($this, $mutator) ) {
+        if (method_exists($this, $mutator)) {
             $this->{$mutator}($value);
+
             return;
         }
 
         // if key belongs to meta data, append its value.
-        if ( $this->metaData->has($key) ) {
+        if ($this->metaData->has($key)) {
             /*if ( is_null($value) ) {
                 $this->metaData[$key]->markForDeletion();
                 return;
@@ -346,8 +343,9 @@ trait Metable
         }
 
         // if model table has the column named to the key
-        if ( \Schema::hasColumn($this->getTable(), $key) ) {
+        if (\Schema::hasColumn($this->getTable(), $key)) {
             parent::setAttribute($key, $value);
+
             return;
         }
 
@@ -360,17 +358,16 @@ trait Metable
     public function __isset($key)
     {
         // trait properties.
-        if ( starts_with($key, 'meta') || $key == 'query' ) {
+        if (starts_with($key, 'meta') || $key == 'query') {
             return isset($this->{$key});
         }
 
         // check parent first.
-        if ( parent::__isset($key) === true ) {
+        if (parent::__isset($key) === true) {
             return true;
         }
 
         // lets check meta data.
         return isset($this->getMetaData()[$key]);
     }
-
 }

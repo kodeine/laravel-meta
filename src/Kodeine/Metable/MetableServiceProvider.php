@@ -1,4 +1,6 @@
-<?php namespace Kodeine\Metable;
+<?php
+
+namespace Kodeine\Metable;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -28,7 +30,6 @@ class MetableServiceProvider extends ServiceProvider
      */
     public function register()
     {
-
     }
 
     /**
