@@ -1,11 +1,10 @@
 <?php
 
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
 
 class CreatePostsMetaTable extends Migration
 {
-
     /**
      * Run the migrations.
      *
@@ -37,5 +36,4 @@ class CreatePostsMetaTable extends Migration
     {
         Schema::drop('posts_meta');
     }
-
 }
