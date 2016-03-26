@@ -103,8 +103,6 @@ trait Metable
 
         $getMeta = 'getMeta' . ucfirst(strtolower(gettype($key)));
 
-
-
         return $this->$getMeta($key, $raw);
     }
 
@@ -206,7 +204,6 @@ trait Metable
 
     protected function getMetaData()
     {
-
         if ( ! isset($this->metaLoaded) ) {
 
             $this->setObserver();
@@ -215,8 +212,6 @@ trait Metable
                 $objects = $this->getModelStub()
                     ->where($this->metaKeyName, $this->modelKey)
                     ->get();
-
-                 
 
                 if ( ! is_null($objects) ) {
                     $this->metaLoaded = true;
