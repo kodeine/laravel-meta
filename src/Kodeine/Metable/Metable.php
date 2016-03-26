@@ -13,7 +13,8 @@ trait Metable
      */
     public function scopeMeta($query)
     {
-        return $query->join($this->table.'_meta',$this->table.'.id','=',$this->table.'_meta.user_id');
+        return $query->join($this->table.'_meta', $this->table.'.id', '=', $this->table.'_meta.'.$this->getMetaKeyName())
+            ->select($this->table.'.*');
     }
 
     /**
@@ -101,6 +102,8 @@ trait Metable
         }
 
         $getMeta = 'getMeta' . ucfirst(strtolower(gettype($key)));
+
+
 
         return $this->$getMeta($key, $raw);
     }
@@ -203,6 +206,7 @@ trait Metable
 
     protected function getMetaData()
     {
+
         if ( ! isset($this->metaLoaded) ) {
 
             $this->setObserver();
@@ -211,6 +215,8 @@ trait Metable
                 $objects = $this->getModelStub()
                     ->where($this->metaKeyName, $this->modelKey)
                     ->get();
+
+                 
 
                 if ( ! is_null($objects) ) {
                     $this->metaLoaded = true;
