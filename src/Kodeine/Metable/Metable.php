@@ -6,6 +6,16 @@ use Illuminate\Support\Collection as BaseCollection;
 
 trait Metable
 {
+    
+    /**
+     * Meta scope for easier join
+     * -------------------------
+     */
+    public function scopeMeta($query)
+    {
+        return $query->join($this->table.'_meta',$this->table.'.id','=',$this->table.'_meta.user_id');
+    }
+
     /**
      * Set Meta Data functions
      * -------------------------
