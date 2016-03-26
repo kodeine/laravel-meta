@@ -80,7 +80,7 @@ class Post extends Eloquent
 }
 ```
 
-**Gotcha**
+#### Gotcha
 When you extend a model and still want to use the same meta table you must override `getMetaKeyName` function.
 
 ```
