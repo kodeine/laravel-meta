@@ -13,7 +13,8 @@ trait Metable
      */
     public function scopeMeta($query)
     {
-        return $query->join($this->table.'_meta',$this->table.'.id','=',$this->table.'_meta.user_id');
+        return $query->join($this->table.'_meta', $this->table.'.id', '=', $this->table.'_meta.'.$this->getMetaKeyName())
+            ->select($this->table.'.*');
     }
 
     /**

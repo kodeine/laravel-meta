@@ -80,6 +80,26 @@ class Post extends Eloquent
 }
 ```
 
+#### Gotcha
+When you extend a model and still want to use the same meta table you must override `getMetaKeyName` function.
+
+```
+class Post extends Eloquent
+{
+    
+}
+
+class Slideshow extends Post
+{
+    protected function getMetaKeyName()
+    {
+        return 'post_id' // The parent foreign key 
+    }   
+}
+```
+
+
+
 ## Working With Meta
 
 #### Setting Content Meta
@@ -215,4 +235,18 @@ To fetch all metas associated with a piece of content and return them as an arra
 
 ```php
 $metas = $post->getMeta()->toArray();
+```
+
+#### Meta Table Join
+
+When you need to filter your model based on the meta data , you can use `meta` scope in Eloquent Query Builder.
+
+```php
+
+$post = Post::meta()
+    ->where(function($query){
+          $query->where('posts_meta.key', '=', 'revision')
+                ->where('posts_meta.value', '=', 'draft');
+    })
+
 ```
