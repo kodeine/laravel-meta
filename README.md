@@ -98,6 +98,12 @@ class Slideshow extends Post
 }
 ```
 
+Metable Trait has a generic relations method base on what the table name returned by getMetaTable()
+This relation can be eagerloaded.
+```
+$post = Post::with(['metas'])->get();
+```
+
 
 
 ## Working With Meta
