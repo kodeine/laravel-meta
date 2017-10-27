@@ -4,6 +4,7 @@ namespace Kodeine\Metable;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as BaseCollection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 trait Metable
 {
