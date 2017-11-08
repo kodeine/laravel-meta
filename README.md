@@ -250,3 +250,11 @@ $post = Post::meta()
     })
 
 ```
+
+#### Eager Loading
+
+When you need to retrive multiple results from your model, you can eager load `metas`
+
+```
+$post = Post::with(['metas'])->get();
+```

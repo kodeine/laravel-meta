@@ -4,6 +4,7 @@ namespace Kodeine\Metable;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as BaseCollection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 trait Metable
 {
@@ -93,6 +94,7 @@ trait Metable
      * Get Meta Data functions
      * -------------------------.
      */
+     
     public function getMeta($key = null, $raw = false)
     {
         if (is_string($key) && preg_match('/[,|]/is', $key, $m)) {
@@ -141,6 +143,17 @@ trait Metable
         }
 
         return $collection;
+    }
+
+    /**
+     * Relationship for meta tables
+     */
+    public function metas()
+    {
+        $model = new \Kodeine\Metable\MetaData();
+        $model->setTable($this->getMetaTable());
+
+        return new HasMany($model->newQuery(), $this, $this->getForeignKey(), $this->getKeyName());
     }
 
     /**
@@ -204,9 +217,8 @@ trait Metable
             $this->setObserver();
 
             if ($this->exists) {
-                $objects = $this->getModelStub()
-                    ->where($this->metaKeyName, $this->modelKey)
-                    ->get();
+                $objects = $this->metas
+                    ->where($this->metaKeyName, $this->modelKey);
 
                 if (!is_null($objects)) {
                     $this->metaLoaded = true;
