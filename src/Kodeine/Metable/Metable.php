@@ -153,7 +153,7 @@ trait Metable
         $model = new \Kodeine\Metable\MetaData();
         $model->setTable($this->getMetaTable());
 
-        return new HasMany($model->newQuery(), $this, $this->getForeignKey(), $this->getKeyName());
+        return new HasMany($model->newQuery(), $this, $this->getMetaKeyName(), $this->getKeyName());
     }
 
     /**
