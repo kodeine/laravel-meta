@@ -303,8 +303,10 @@ trait Metable
         // unset attributes and relations
         parent::__unset($key);
 
-        // delete meta
-        $this->unsetMeta($key);
+        // delete meta, only if pivot-prefix is not detected (avoiding "unset" during m2m pivot query)
+        if (strpos($key, 'pivot_') !== 0) {
+            $this->unsetMeta($key);
+        }
     }
 
     public function __get($attr)
