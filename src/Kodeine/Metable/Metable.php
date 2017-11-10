@@ -303,7 +303,9 @@ trait Metable
         // unset attributes and relations
         parent::__unset($key);
 
-        // delete meta, only if pivot-prefix is not detected (avoiding "unset" during m2m pivot query)
+        // delete meta, only if pivot-prefix is not detected in order to avoid unnecessary (N+1) queries
+        // since Eloquent tries to "unset" pivot-prefixed attributes in m2m queries on pivot tables.
+        // N.B. Regular unset of pivot-prefixed keys is thus compromised.
         if (strpos($key, 'pivot_') !== 0) {
             $this->unsetMeta($key);
         }
