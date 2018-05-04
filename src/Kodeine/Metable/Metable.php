@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 trait Metable
 {
-    
+
     /**
      * Meta scope for easier join
      * -------------------------
@@ -94,7 +94,7 @@ trait Metable
      * Get Meta Data functions
      * -------------------------.
      */
-     
+
     public function getMeta($key = null, $raw = false)
     {
         if (is_string($key) && preg_match('/[,|]/is', $key, $m)) {
@@ -103,7 +103,17 @@ trait Metable
 
         $getMeta = 'getMeta'.ucfirst(strtolower(gettype($key)));
 
-        return $this->$getMeta($key, $raw);
+        // Default value is used if getMeta is null
+        return $this->$getMeta($key, $raw) ?? $this->getMetaDefaultValue($key);
+    }
+
+    // Returns either the default value or null if default isn't set
+    private function getMetaDefaultValue($key) {
+          if(isset($this->defaultMetaValues) && array_key_exists($key, $this->defaultMetaValues)) {
+            return $this->defaultMetaValues[$key];
+        } else {
+            return null;
+        }
     }
 
     protected function getMetaString($key, $raw = false)
@@ -349,6 +359,18 @@ trait Metable
             return;
         }
 
+        // If there is a default value, remove the meta row instead - future returns of
+        // this value will be handled via the default logic in the accessor
+        if(
+            isset($this->defaultMetaValues) &&
+            array_key_exists($key, $this->defaultMetaValues) &&
+            $this->defaultMetaValues[$key] == $value
+        ) {
+          $this->unsetMeta($key);
+
+          return;
+        }
+
         // if the key has a mutator execute it
         $mutator = camel_case('set_'.$key.'_meta');
 
@@ -392,6 +414,13 @@ trait Metable
         // check parent first.
         if (parent::__isset($key) === true) {
             return true;
+        }
+
+
+        // Keys with default values always "exist" from the perspective
+        // of the end calling function, even if the DB row doesn't exist
+        if(isset($this->defaultMetaValues) && array_key_exists($key, $this->defaultMetaValues)) {
+          return true;
         }
 
         // lets check meta data.
