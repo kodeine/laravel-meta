@@ -13,10 +13,9 @@ trait Metable
      * Meta scope for easier join
      * -------------------------
      */
-    public function scopeMeta($query)
+    public function scopeMeta($query, $alias = 'meta')
     {
-            return $query->join($this->getMetaTable(), $this->getQualifiedKeyName(), '=', $this->getMetaTable().'.'.$this->getMetaKeyName())
-                ->select($this->getTable().'.*');
+      return $query->join($this->getMetaTable() . ' AS ' . $alias, $this->getQualifiedKeyName(), '=', $alias . '.' .$this->getMetaKeyName())->select($this->getTable().'.*');
     }
 
     /**
