@@ -8,14 +8,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 trait Metable
 {
-    
+
     /**
      * Meta scope for easier join
      * -------------------------
      */
-    public function scopeMeta($query, $alias = 'meta')
+    public function scopeMeta($query, $alias = null)
     {
-      return $query->join($this->getMetaTable() . ' AS ' . $alias, $this->getQualifiedKeyName(), '=', $alias . '.' .$this->getMetaKeyName())->select($this->getTable().'.*');
+        $alias = $alias ?? $this->getMetaTable();
+        return $query->join($this->getMetaTable() . ' AS ' . $alias, $this->getQualifiedKeyName(), '=', $alias . '.' . $this->getMetaKeyName())->select($this->getTable() . '.*');
     }
 
     /**
@@ -93,7 +94,7 @@ trait Metable
      * Get Meta Data functions
      * -------------------------.
      */
-     
+
     public function getMeta($key = null, $raw = false)
     {
         if (is_string($key) && preg_match('/[,|]/is', $key, $m)) {
