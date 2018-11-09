@@ -15,7 +15,7 @@ trait Metable
      */
     public function scopeMeta($query, $alias = null)
     {
-        $alias = $alias ?? $this->getMetaTable();
+        $alias = (empty($alias)) ? $this->getMetaTable() : $alias;
         return $query->join($this->getMetaTable() . ' AS ' . $alias, $this->getQualifiedKeyName(), '=', $alias . '.' . $this->getMetaKeyName())->select($this->getTable() . '.*');
     }
 
