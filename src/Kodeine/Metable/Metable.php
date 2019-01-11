@@ -100,6 +100,10 @@ trait Metable
         if (is_string($key) && preg_match('/[,|]/is', $key, $m)) {
             $key = preg_split('/ ?[,|] ?/', $key);
         }
+        
+        if($key === $this->getKeyName()) {
+            return;
+        }
 
         $getMeta = 'getMeta'.ucfirst(strtolower(gettype($key)));
 
