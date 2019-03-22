@@ -150,7 +150,8 @@ trait Metable
      */
     public function metas()
     {
-        $model = new \Kodeine\Metable\MetaData();
+        $classname = $this->getMetaClass();
+        $model = new $classname;
         $model->setTable($this->getMetaTable());
 
         return new HasMany($model->newQuery(), $this, $this->getMetaKeyName(), $this->getKeyName());
@@ -182,7 +183,8 @@ trait Metable
     protected function getModelStub()
     {
         // get new meta model instance
-        $model = new \Kodeine\Metable\MetaData();
+        $classname = $this->getMetaClass();
+        $model = $classname;
         $model->setTable($this->metaTable);
 
         // model fill with attributes.
@@ -255,11 +257,21 @@ trait Metable
     /**
      * Return the table name.
      *
-     * @return null
+     * @return string
      */
     protected function getMetaTable()
     {
         return isset($this->metaTable) ? $this->metaTable : $this->getTable().'_meta';
+    }
+
+    /**
+     * Return the table name.
+     *
+     * @return string
+     */
+    protected function getMetaClass()
+    {
+        return isset($this->metaClass) ? $this->metaClass : Kodeine\Metable\MetaData::class;
     }
 
     /**
