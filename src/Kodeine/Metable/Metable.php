@@ -382,7 +382,7 @@ trait Metable
         }
 
         // if model table has the column named to the key
-        if (\Schema::hasColumn($this->getTable(), $key)) {
+        if (\Schema::connection($this->connection)->hasColumn($this->getTable(), $key)) {
             parent::setAttribute($key, $value);
 
             return;
