@@ -298,6 +298,19 @@ trait Metable
         return $this->getMeta($key);
     }
 
+    /**
+     * Set attributes for the model
+     *
+     * @param array $attributes
+     *
+     * @return void
+     */
+    public function setAttributes(array $attributes) {
+        foreach ($attributes as $key => $value) {
+            $this->$key = $value;
+        }
+    }
+
     public function __unset($key)
     {
         // unset attributes and relations
