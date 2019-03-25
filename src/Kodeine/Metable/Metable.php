@@ -265,7 +265,7 @@ trait Metable
     }
 
     /**
-     * Return the table name.
+     * Return the model class name.
      *
      * @return string
      */
