@@ -271,7 +271,7 @@ trait Metable
      */
     protected function getMetaClass()
     {
-        return isset($this->metaClass) ? $this->metaClass : Kodeine\Metable\MetaData::class;
+        return isset($this->metaClass) ? $this->metaClass : MetaData::class;
     }
 
     /**
