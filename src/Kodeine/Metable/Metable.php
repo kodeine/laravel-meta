@@ -184,7 +184,7 @@ trait Metable
     {
         // get new meta model instance
         $classname = $this->getMetaClass();
-        $model = $classname;
+        $model = new $classname;
         $model->setTable($this->metaTable);
 
         // model fill with attributes.
