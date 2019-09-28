@@ -14,7 +14,7 @@ Metable is Fluent, just like using an eloquent model attribute you can set or un
 Add this to your composer.json file, in the require object:
 
 ```javascript
-"kodeine/laravel-meta": "dev-master"
+"kodeine/laravel-meta": "master"
 ```
 
 After that, run composer install to install the package.
