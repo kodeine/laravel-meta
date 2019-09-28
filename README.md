@@ -80,20 +80,36 @@ class Post extends Eloquent
 }
 ```
 
+#### Default Model Attribute values
+
+Additionally, you can set default values by setting an array called `$defaultMetaValues` on the model. Setting default has two side-effects:
+
+  1. If a meta attribute does not exist, the default value will be returned instead of `null`.
+
+  2. if you attempt to set a meta attribute to the default value, the row in the meta table will be removed, which will cause the default value to be returned, as per rule 1.
+
+This is be the desired and expected functionality for most projects, but be aware that you may need to reimplement default functionality with your own custom accessors and mutators if this functionality does not fit your needs.
+
+```
+   public $defaultMetaValues = [
+      'is_user_home_sick' => false,
+   ];
+```
+
 #### Gotcha
 When you extend a model and still want to use the same meta table you must override `getMetaKeyName` function.
 
 ```
 class Post extends Eloquent
 {
-    
+
 }
 
 class Slideshow extends Post
 {
     protected function getMetaKeyName()
     {
-        return 'post_id' // The parent foreign key 
+        return 'post_id' // The parent foreign key
     }   
 }
 ```
