@@ -150,7 +150,8 @@ trait Metable
      */
     public function metas()
     {
-        $model = new \Kodeine\Metable\MetaData();
+        $classname = $this->getMetaClass();
+        $model = new $classname;
         $model->setTable($this->getMetaTable());
 
         return new HasMany($model->newQuery(), $this, $this->getMetaKeyName(), $this->getKeyName());
@@ -182,7 +183,8 @@ trait Metable
     protected function getModelStub()
     {
         // get new meta model instance
-        $model = new \Kodeine\Metable\MetaData();
+        $classname = $this->getMetaClass();
+        $model = new $classname;
         $model->setTable($this->metaTable);
 
         // model fill with attributes.
@@ -255,11 +257,21 @@ trait Metable
     /**
      * Return the table name.
      *
-     * @return null
+     * @return string
      */
     protected function getMetaTable()
     {
         return isset($this->metaTable) ? $this->metaTable : $this->getTable().'_meta';
+    }
+
+    /**
+     * Return the model class name.
+     *
+     * @return string
+     */
+    protected function getMetaClass()
+    {
+        return isset($this->metaClass) ? $this->metaClass : MetaData::class;
     }
 
     /**
@@ -370,7 +382,7 @@ trait Metable
         }
 
         // if model table has the column named to the key
-        if (\Schema::hasColumn($this->getTable(), $key)) {
+        if (\Schema::connection($this->connection)->hasColumn($this->getTable(), $key)) {
             parent::setAttribute($key, $value);
 
             return;
