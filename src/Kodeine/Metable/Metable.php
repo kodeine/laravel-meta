@@ -8,7 +8,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 trait Metable
 {
-
+    
+    // Static property registration sigleton for save observation and slow large set hotfix
+    public static $_isObserverRegistered;
+    
     /**
      * Meta scope for easier join
      * -------------------------
@@ -175,9 +178,12 @@ trait Metable
      */
     protected function setObserver()
     {
-        $this->saved(function ($model) {
-            $model->saveMeta();
-        });
+        if(!isset(self::$_isObserverRegistered)) {
+            $this->saved(function ($model) {
+                $model->saveMeta();
+            });
+            self::$_isObserverRegistered = true;
+        }
     }
 
     protected function getModelStub()
