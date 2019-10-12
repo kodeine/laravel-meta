@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 trait Metable
 {
+    
+    // Static property registration sigleton for save observation and slow large set hotfix
+    public static $_isObserverRegistered;
 
     /**
      * Meta scope for easier join
@@ -104,7 +107,17 @@ trait Metable
 
         $getMeta = 'getMeta'.ucfirst(strtolower(gettype($key)));
 
-        return $this->$getMeta($key, $raw);
+        // Default value is used if getMeta is null
+        return $this->$getMeta($key, $raw) ?? $this->getMetaDefaultValue($key);
+    }
+
+    // Returns either the default value or null if default isn't set
+    private function getMetaDefaultValue($key) {
+          if(isset($this->defaultMetaValues) && array_key_exists($key, $this->defaultMetaValues)) {
+            return $this->defaultMetaValues[$key];
+        } else {
+            return null;
+        }
     }
 
     protected function getMetaString($key, $raw = false)
@@ -151,7 +164,8 @@ trait Metable
      */
     public function metas()
     {
-        $model = new \Kodeine\Metable\MetaData();
+        $classname = $this->getMetaClass();
+        $model = new $classname;
         $model->setTable($this->getMetaTable());
 
         return new HasMany($model->newQuery(), $this, $this->getMetaKeyName(), $this->getKeyName());
@@ -175,15 +189,19 @@ trait Metable
      */
     protected function setObserver()
     {
-        $this->saved(function ($model) {
-            $model->saveMeta();
-        });
+        if(!isset(self::$_isObserverRegistered)) {
+            $this->saved(function ($model) {
+                $model->saveMeta();
+            });
+            self::$_isObserverRegistered = true;
+        }
     }
 
     protected function getModelStub()
     {
         // get new meta model instance
-        $model = new \Kodeine\Metable\MetaData();
+        $classname = $this->getMetaClass();
+        $model = new $classname;
         $model->setTable($this->metaTable);
 
         // model fill with attributes.
@@ -256,11 +274,21 @@ trait Metable
     /**
      * Return the table name.
      *
-     * @return null
+     * @return string
      */
     protected function getMetaTable()
     {
         return isset($this->metaTable) ? $this->metaTable : $this->getTable().'_meta';
+    }
+
+    /**
+     * Return the model class name.
+     *
+     * @return string
+     */
+    protected function getMetaClass()
+    {
+        return isset($this->metaClass) ? $this->metaClass : MetaData::class;
     }
 
     /**
@@ -350,6 +378,18 @@ trait Metable
             return;
         }
 
+        // If there is a default value, remove the meta row instead - future returns of
+        // this value will be handled via the default logic in the accessor
+        if(
+            isset($this->defaultMetaValues) &&
+            array_key_exists($key, $this->defaultMetaValues) &&
+            $this->defaultMetaValues[$key] == $value
+        ) {
+          $this->unsetMeta($key);
+
+          return;
+        }
+
         // if the key has a mutator execute it
         $mutator = Str::camel('set_'.$key.'_meta');
 
@@ -371,7 +411,7 @@ trait Metable
         }
 
         // if model table has the column named to the key
-        if (\Schema::hasColumn($this->getTable(), $key)) {
+        if (\Schema::connection($this->connection)->hasColumn($this->getTable(), $key)) {
             parent::setAttribute($key, $value);
 
             return;
@@ -393,6 +433,13 @@ trait Metable
         // check parent first.
         if (parent::__isset($key) === true) {
             return true;
+        }
+
+
+        // Keys with default values always "exist" from the perspective
+        // of the end calling function, even if the DB row doesn't exist
+        if(isset($this->defaultMetaValues) && array_key_exists($key, $this->defaultMetaValues)) {
+          return true;
         }
 
         // lets check meta data.

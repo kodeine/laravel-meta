@@ -1,5 +1,22 @@
 composer.phar
 composer.lock
-.DS_Store
 Thumbs.db
 .idea
+
+### OSX ###
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Vim
+*~
+*.swp
+*.swo
+
+# dbs
+*.tar
+*.gz
+*.zip
+*.tgz
+*.dump
+*.mmdb
