@@ -155,6 +155,18 @@ $post->setMeta([
 $post->save();
 ```
 
+Or `set multiple metas and columns` at once:
+
+```php
+...
+$post->setAttributes([
+    'name' => 'hello world'; // model attribute
+    'content' => 'Some content here',
+    'views' => 1,
+]);
+$post->save();
+```
+
 > **Note:** If a piece of content already has a meta the existing value will be updated.
 
 #### Unsetting Content Meta
