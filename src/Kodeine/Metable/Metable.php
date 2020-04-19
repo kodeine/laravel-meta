@@ -298,9 +298,11 @@ trait Metable
      */
     public function toArray()
     {
-        return array_merge(parent::toArray(), [
-            'meta_data' => $this->getMeta()->toArray(),
-        ]);
+        return $this->hideMeta ?
+            parent::toArray() :
+            array_merge(parent::toArray(), [
+                'meta_data' => $this->getMeta()->toArray(),
+            ]);
     }
 
     /**

@@ -288,3 +288,13 @@ When you need to retrive multiple results from your model, you can eager load `m
 ```
 $post = Post::with(['metas'])->get();
 ```
+
+#### Prevent metas attribute from being populated
+
+When you convert a model to an array (or json) and you don't need all meta fields, you can create a model's property to prevent metas from being added to the resulting array.
+You can also use it on eloquent relations.
+
+```
+/* Post model */
+public $hideMeta = true; // Do not add metas to array
+```
