@@ -388,7 +388,7 @@ trait Metable
         }
 
         // if key is a model attribute, set as is
-        if (array_key_exists($key, parent::getAttributes()) || $this->{$key}() instanceof Relation) {
+        if (array_key_exists($key, parent::getAttributes())) {
             parent::setAttribute($key, $value);
 
             return;
