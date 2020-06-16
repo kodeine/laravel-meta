@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 trait Metable
 {
-    
+
     // Static property registration sigleton for save observation and slow large set hotfix
     public static $_isObserverRegistered;
 
@@ -393,6 +393,15 @@ trait Metable
 
             return;
         }
+
+        // if key is a relation, set as is
+        try {
+            if ($this->{$key}() instanceof Relation) {
+                parent::setAttribute($key, $value);
+
+                return;
+            }
+        } catch (\BadMethodCallException $ex) {}
 
         // If there is a default value, remove the meta row instead - future returns of
         // this value will be handled via the default logic in the accessor
