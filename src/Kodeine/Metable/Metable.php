@@ -3,6 +3,7 @@
 namespace Kodeine\Metable;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection as BaseCollection;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -387,7 +388,7 @@ trait Metable
         }
 
         // if key is a model attribute, set as is
-        if (array_key_exists($key, parent::getAttributes())) {
+        if (array_key_exists($key, parent::getAttributes()) || $this->{$key}() instanceof Relation) {
             parent::setAttribute($key, $value);
 
             return;
