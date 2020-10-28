@@ -12,6 +12,7 @@ trait Metable
     
     // Static property registration sigleton for save observation and slow large set hotfix
     public static $_isObserverRegistered;
+    public static $_columnNames;
 
     /**
      * Meta scope for easier join
@@ -341,6 +342,18 @@ trait Metable
             $this->$key = $value;
         }
     }
+    
+    /**
+     * Determine if model table has a given column.
+     * 
+     * @param  [string]  $column
+     * 
+     * @return boolean
+     */
+    public function hasColumn($column) {
+        if(empty(self::$_columnNames)) self::$_columnNames = array_map('strtolower',\Schema::connection($this->connection)->getColumnListing($this->getTable()));
+        return in_array(strtolower($column), self::$_columnNames);
+    }
 
     public function __unset($key)
     {
@@ -426,7 +439,7 @@ trait Metable
         }
 
         // if model table has the column named to the key
-        if (\Schema::connection($this->connection)->hasColumn($this->getTable(), $key)) {
+        if ($this->hasColumn($key)) {
             parent::setAttribute($key, $value);
 
             return;
