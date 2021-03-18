@@ -13,6 +13,16 @@ trait Metable
     // Static property registration sigleton for save observation and slow large set hotfix
     public static $_isObserverRegistered;
     public static $_columnNames;
+    
+    /**
+     * whereMeta scope for easier join
+     * -------------------------
+     */
+    public function scopeWhereMeta($query, $key, $value, $alias = null)
+    {
+        $alias = (empty($alias)) ? $this->getMetaTable() : $alias;
+        return $query->join($this->getMetaTable() . ' AS ' . $alias, $this->getQualifiedKeyName(), '=', $alias . '.' . $this->getMetaKeyName())->where('key', '=', $key)->where('value', '=', $value)->select($this->getTable() . '.*');
+    }
 
     /**
      * Meta scope for easier join
