@@ -351,7 +351,7 @@ trait Metable
      * @return boolean
      */
     public function hasColumn($column) {
-        if(empty(self::$_columnNames)) self::$_columnNames = array_map('strtolower',\Schema::connection($this->connection)->getColumnListing($this->getTable()));
+        if(empty(self::$_columnNames)) self::$_columnNames = array_map('strtolower',\Schema::connection($this->getConnectionName())->getColumnListing($this->getTable()));
         return in_array(strtolower($column), self::$_columnNames);
     }
 
