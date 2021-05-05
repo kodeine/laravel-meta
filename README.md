@@ -116,6 +116,29 @@ class Slideshow extends Post
 }
 ```
 
+#### Changing the default connection name
+
+If you are using this package with a secondary database connection, you can set the `METADATA_DATABASE` variable in your `.env.php`in order to let this package know the secondary connection database name.
+
+```
+// CONNECTION #1
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=<NAME>
+DB_USERNAME=<USERNAME>
+DB_PASSWORD=<PASSWORD>
+
+// CONNECTION #2
+DB_CONNECTION=mysql
+DB_HOST=<SOME_OTHER_HOST>
+DB_PORT=3306
+DB_DATABASE=<NAME> <--
+DB_USERNAME=<USERNAME>
+DB_PASSWORD=<PASSWORD>
+METADATA_DATABASE=<NAME> <--
+
+```
 
 
 ## Working With Meta
