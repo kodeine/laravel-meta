@@ -118,7 +118,7 @@ class Slideshow extends Post
 
 #### Changing the default connection name
 
-If you are using this package with a secondary database connection, you can set the `METADATA_DATABASE` variable in your `.env.php`in order to let this package know the secondary connection database name.
+If you are using this package with a secondary database connection, you can set the `METADATA_DATABASE` variable in your `.env`in order to let this package know the secondary connection database name.
 
 ```
 // CONNECTION #1
