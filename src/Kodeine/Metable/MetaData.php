@@ -33,6 +33,17 @@ class MetaData extends Model
     {
         $this->markForDeletion = $bool;
     }
+    
+     /**
+     * Get the current connection name for the model.
+     *
+     * @return string|null
+     */
+    public function getConnectionName()
+    {
+        return env('METADATA_DATABASE') ?? $this->connection;
+    }
+
 
     /**
      * Check if the model needs to be deleted.
