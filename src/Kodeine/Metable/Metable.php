@@ -213,7 +213,7 @@ trait Metable
         // get new meta model instance
         $classname = $this->getMetaClass();
         $model = new $classname;
-        $model->setTable($this->metaTable);
+        $model->setTable($this->getMetaTable());
 
         // model fill with attributes.
         if (func_num_args() > 0) {
@@ -226,7 +226,7 @@ trait Metable
     protected function saveMeta()
     {
         foreach ($this->metaData as $meta) {
-            $meta->setTable($this->metaTable);
+            $meta->setTable($this->getMetaTable());
 
             if ($meta->isMarkedForDeletion()) {
                 $meta->delete();
