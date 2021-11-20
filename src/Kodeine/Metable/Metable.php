@@ -277,7 +277,7 @@ trait Metable
      *
      * @return string
      */
-    protected function getMetaKeyName()
+    public function getMetaKeyName()
     {
         return isset($this->metaKeyName) ? $this->metaKeyName : $this->getForeignKey();
     }
@@ -287,7 +287,7 @@ trait Metable
      *
      * @return string
      */
-    protected function getMetaTable()
+    public function getMetaTable()
     {
         return isset($this->metaTable) ? $this->metaTable : $this->getTable().'_meta';
     }
