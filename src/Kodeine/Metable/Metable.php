@@ -9,9 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 trait Metable
 {
-    
-    // Static property registration sigleton for save observation and slow large set hotfix
-    public static $_isObserverRegistered;
+	
     public static $_columnNames;
     
     /**
@@ -194,20 +192,6 @@ trait Metable
             ->get();
     }
 
-    /**
-     * Trait specific functions
-     * -------------------------.
-     */
-    protected function setObserver()
-    {
-        if(!isset(self::$_isObserverRegistered)) {
-            $this->saved(function ($model) {
-                $model->saveMeta();
-            });
-            self::$_isObserverRegistered = true;
-        }
-    }
-
     protected function getModelStub()
     {
         // get new meta model instance
@@ -244,7 +228,6 @@ trait Metable
     protected function getMetaData()
     {
         if (!isset($this->metaLoaded)) {
-            $this->setObserver();
 
             if ($this->exists) {
                 $objects = $this->metas
@@ -364,6 +347,12 @@ trait Metable
         if(empty(self::$_columnNames)) self::$_columnNames = array_map('strtolower',\Schema::connection($this->getConnectionName())->getColumnListing($this->getTable()));
         return in_array(strtolower($column), self::$_columnNames);
     }
+	
+	public static function bootMetable(){
+		static::saved(function ($model) {
+			$model->saveMeta();
+		});
+	}
 
     public function __unset($key)
     {
