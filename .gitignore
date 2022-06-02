@@ -21,3 +21,4 @@ Thumbs.db
 *.dump
 *.mmdb
 *.history
+/vendor/
