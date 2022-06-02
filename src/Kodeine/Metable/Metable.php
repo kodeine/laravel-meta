@@ -348,13 +348,6 @@ trait Metable
 	}
 	
 	public function __set($key, $value) {
-		// ignore the trait properties being set.
-		if ( Str::startsWith( $key, 'meta' ) || $key == 'query' ) {
-			$this->$key = $value;
-			
-			return;
-		}
-		
 		// if key is a model attribute, set as is
 		if ( array_key_exists( $key, parent::getAttributes() ) ) {
 			parent::setAttribute( $key, $value );
@@ -408,10 +401,6 @@ trait Metable
 	}
 	
 	public function __isset($key) {
-		// trait properties.
-		if ( Str::startsWith( $key, 'meta' ) || $key == 'query' ) {
-			return isset( $this->{$key} );
-		}
 		
 		// check parent first.
 		if ( parent::__isset( $key ) === true ) {
