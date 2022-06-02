@@ -60,15 +60,16 @@ trait Metable
 		] );
 	}
 	
-	protected function setMetaArray() {
+	protected function setMetaArray(): Collection {
 		list( $metas ) = func_get_args();
 		
+		$collection = new Collection();
+		
 		foreach ($metas as $key => $value) {
-			$this->setMetaString( $key, $value );
+			$collection[] = $this->setMetaString( $key, $value );
 		}
 		
-		return $this->getMetaData()->sortByDesc( 'id' )
-			->take( count( $metas ) );
+		return $collection;
 	}
 	
 	/**
