@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 trait Metable
 {
 	
+	protected $__metaData = null;
+	
 	/**
 	 * whereMeta scope for easier join
 	 * -------------------------
@@ -215,19 +217,18 @@ trait Metable
 	}
 	
 	protected function getMetaData() {
-		static $metaData;
-		if ( is_null( $metaData ) ) {
+		if ( is_null( $this->__metaData ) ) {
 			
 			if ( $this->exists ) {
 				if ( ! is_null( $this->metas ) ) {
-					$metaData = $this->metas->keyBy( 'key' );
+					$this->__metaData = $this->metas->keyBy( 'key' );
 				}
 			}
 			else {
-				$metaData = new Collection();
+				$this->__metaData = new Collection();
 			}
 		}
-		return $metaData;
+		return $this->__metaData;
 	}
 	
 	/**
