@@ -196,7 +196,7 @@ trait Metable
 		return $model;
 	}
 	
-	protected function saveMeta() {
+	public function saveMeta() {
 		foreach ($this->getMetaData() as $meta) {
 			$meta->setTable( $this->getMetaTable() );
 			
