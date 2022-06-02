@@ -348,8 +348,8 @@ trait Metable
 	}
 	
 	public function __set($key, $value) {
-		// if key is a model attribute, set as is
-		if ( array_key_exists( $key, parent::getAttributes() ) ) {
+		// if key is a model attribute or has the column named to the key, set as is
+		if ( $this->hasColumn( $key ) || array_key_exists( $key, parent::getAttributes() ) ) {
 			parent::setAttribute( $key, $value );
 			
 			return;
@@ -376,28 +376,8 @@ trait Metable
 			return;
 		}
 		
-		// if key belongs to meta data, append its value.
-		if ( $this->getMetaData()->has( $key ) ) {
-			/*if ( is_null($value) ) {
-				$this->getMetaData()[$key]->markForDeletion();
-				return;
-			}*/
-			$this->getMetaData()[$key]->value = $value;
-			
-			return;
-		}
-		
-		// if model table has the column named to the key
-		if ( $this->hasColumn( $key ) ) {
-			parent::setAttribute( $key, $value );
-			
-			return;
-		}
-		
 		// key doesn't belong to model, lets create a new meta relationship
-		//if ( ! is_null($value) ) {
 		$this->setMetaString( $key, $value );
-		//}
 	}
 	
 	public function __isset($key) {
