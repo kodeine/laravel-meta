@@ -219,10 +219,8 @@ trait Metable
 	protected function getMetaData() {
 		if ( is_null( $this->__metaData ) ) {
 			
-			if ( $this->exists ) {
-				if ( ! is_null( $this->metas ) ) {
-					$this->__metaData = $this->metas->keyBy( 'key' );
-				}
+			if ( $this->exists && ! is_null( $this->metas ) ) {
+				$this->__metaData = $this->metas->keyBy( 'key' );
 			}
 			else {
 				$this->__metaData = new Collection();
