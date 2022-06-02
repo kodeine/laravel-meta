@@ -14,8 +14,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 trait Metable
 {
 	
-	public static $_columnNames;
-	
 	/**
 	 * whereMeta scope for easier join
 	 * -------------------------
@@ -105,7 +103,7 @@ trait Metable
 	 */
 	
 	public function getMeta($key = null, $raw = false) {
-		if ( is_string( $key ) && preg_match( '/[,|]/is', $key, $m ) ) {
+		if ( is_string( $key ) && preg_match( '/[,|]/is', $key ) ) {
 			$key = preg_split( '/ ?[,|] ?/', $key );
 		}
 		
@@ -126,16 +124,16 @@ trait Metable
 	}
 	
 	protected function getMetaString($key, $raw = false) {
-		$meta = $this->getMetaData()->get( $key, null );
+		$meta = $this->getMetaData()->get( $key );
 		
 		if ( is_null( $meta ) || $meta->isMarkedForDeletion() ) {
-			return;
+			return null;
 		}
 		
 		return ($raw) ? $meta : $meta->value;
 	}
 	
-	protected function getMetaArray($keys, $raw = false) {
+	protected function getMetaArray($keys, $raw = false): BaseCollection {
 		$collection = new BaseCollection();
 		
 		foreach ($this->getMetaData() as $meta) {
@@ -147,7 +145,8 @@ trait Metable
 		return $collection;
 	}
 	
-	protected function getMetaNull() {
+	protected function getMetaNull(): BaseCollection {
+		/** @noinspection PhpUnusedLocalVariableInspection */
 		list( $keys, $raw ) = func_get_args();
 		
 		$collection = new BaseCollection();
@@ -164,7 +163,7 @@ trait Metable
 	/**
 	 * Relationship for meta tables
 	 */
-	public function metas() {
+	public function metas(): HasMany {
 		$classname = $this->getMetaClass();
 		$model = new $classname;
 		$model->setTable( $this->getMetaTable() );
@@ -235,7 +234,7 @@ trait Metable
 	 *
 	 * @return string
 	 */
-	public function getMetaKeyName() {
+	public function getMetaKeyName(): string {
 		return $this->metaKeyName ?? $this->getForeignKey();
 	}
 	
@@ -244,7 +243,7 @@ trait Metable
 	 *
 	 * @return string
 	 */
-	public function getMetaTable() {
+	public function getMetaTable(): string {
 		return $this->metaTable ?? $this->getTable() . '_meta';
 	}
 	
@@ -253,7 +252,7 @@ trait Metable
 	 *
 	 * @return string
 	 */
-	protected function getMetaClass() {
+	protected function getMetaClass(): string {
 		return $this->metaClass ?? MetaData::class;
 	}
 	
@@ -262,8 +261,8 @@ trait Metable
 	 *
 	 * @return array
 	 */
-	public function toArray() {
-		return $this->hideMeta ?
+	public function toArray(): array {
+		return ! empty( $this->hideMeta ) ?
 			parent::toArray() :
 			array_merge( parent::toArray(), [
 				'meta_data' => $this->getMeta()->toArray(),
@@ -313,9 +312,12 @@ trait Metable
 	 *
 	 * @return boolean
 	 */
-	public function hasColumn($column) {
-		if ( empty( self::$_columnNames ) ) self::$_columnNames = array_map( 'strtolower', Schema::connection( $this->getConnectionName() )->getColumnListing( $this->getTable() ) );
-		return in_array( strtolower( $column ), self::$_columnNames );
+	public function hasColumn($column): bool {
+		static $columns;
+		if ( is_null( $columns ) ) {
+			$columns = array_map( 'strtolower', Schema::connection( $this->getConnectionName() )->getColumnListing( $this->getTable() ) );
+		}
+		return in_array( strtolower( $column ), $columns );
 	}
 	
 	public static function bootMetable() {
