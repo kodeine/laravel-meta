@@ -302,6 +302,51 @@ trait Metable
 	}
 	
 	/**
+	 * @inheritDoc
+	 */
+	public function setAttribute($key, $value) {
+		// First we will check for the presence of a mutator
+		// or if key is a model attribute or has a column named to the key
+		if ( $this->hasSetMutator( $key ) ||
+			$this->hasAttributeSetMutator( $key ) ||
+			$this->isEnumCastable( $key ) ||
+			$this->isClassCastable( $key ) ||
+			(! is_null( $value ) && $this->isJsonCastable( $key )) ||
+			str_contains( $key, '->' ) ||
+			$this->hasColumn( $key ) ||
+			array_key_exists( $key, parent::getAttributes() )
+		) {
+			parent::setAttribute( $key, $value );
+			
+			return;
+		}
+		
+		// If there is a default value, remove the meta row instead - future returns of
+		// this value will be handled via the default logic in the accessor
+		if (
+			isset( $this->defaultMetaValues ) &&
+			array_key_exists( $key, $this->defaultMetaValues ) &&
+			$this->defaultMetaValues[$key] == $value
+		) {
+			$this->unsetMeta( $key );
+			
+			return;
+		}
+		
+		// if the key has a mutator execute it
+		$mutator = Str::camel( 'set_' . $key . '_meta' );
+		
+		if ( method_exists( $this, $mutator ) ) {
+			$this->{$mutator}( $value );
+			
+			return;
+		}
+		
+		// key doesn't belong to model, lets create a new meta relationship
+		$this->setMetaString( $key, $value );
+	}
+	
+	/**
 	 * Set attributes for the model
 	 *
 	 * @param array $attributes
@@ -345,39 +390,6 @@ trait Metable
 		if ( strpos( $key, 'pivot_' ) !== 0 ) {
 			$this->unsetMeta( $key );
 		}
-	}
-	
-	public function __set($key, $value) {
-		// if key is a model attribute or has the column named to the key, set as is
-		if ( $this->hasColumn( $key ) || array_key_exists( $key, parent::getAttributes() ) ) {
-			parent::setAttribute( $key, $value );
-			
-			return;
-		}
-		
-		// If there is a default value, remove the meta row instead - future returns of
-		// this value will be handled via the default logic in the accessor
-		if (
-			isset( $this->defaultMetaValues ) &&
-			array_key_exists( $key, $this->defaultMetaValues ) &&
-			$this->defaultMetaValues[$key] == $value
-		) {
-			$this->unsetMeta( $key );
-			
-			return;
-		}
-		
-		// if the key has a mutator execute it
-		$mutator = Str::camel( 'set_' . $key . '_meta' );
-		
-		if ( method_exists( $this, $mutator ) ) {
-			$this->{$mutator}( $value );
-			
-			return;
-		}
-		
-		// key doesn't belong to model, lets create a new meta relationship
-		$this->setMetaString( $key, $value );
 	}
 	
 	public function __isset($key) {
