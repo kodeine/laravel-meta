@@ -290,7 +290,15 @@ trait Metable
 		
 		// there was no attribute on the model
 		// retrieve the data from meta relationship
-		return $this->getMeta( $key );
+		$meta = $this->getMeta( $key );
+		
+		// Check for meta accessor
+		$accessor = Str::camel( 'get_' . $key . '_meta' );
+		
+		if ( method_exists( $this, $accessor ) ) {
+			return $this->{$accessor}( $meta );
+		}
+		return $meta;
 	}
 	
 	/**
@@ -337,20 +345,6 @@ trait Metable
 		if ( strpos( $key, 'pivot_' ) !== 0 ) {
 			$this->unsetMeta( $key );
 		}
-	}
-	
-	public function __get($attr) {
-		// Check for meta accessor
-		$accessor = Str::camel( 'get_' . $attr . '_meta' );
-		
-		if ( method_exists( $this, $accessor ) ) {
-			return $this->{$accessor}();
-		}
-		
-		// leave model relation methods for parent::
-		$isRelationship = method_exists( $this, $attr );
-		
-		return parent::__get( $attr );
 	}
 	
 	public function __set($key, $value) {
