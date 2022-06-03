@@ -22,3 +22,4 @@ Thumbs.db
 *.mmdb
 *.history
 /vendor/
+/.phpunit.result.cache

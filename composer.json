@@ -24,6 +24,7 @@
     "php": ">=7.3",
     "illuminate/support": "^8.0|^9.0",
     "illuminate/database": "^8.0|^9.0",
+    "illuminate/events": "^8.0|^9.0",
     "ext-json": "*"
   },
   "autoload": {
@@ -32,6 +33,14 @@
       "Kodeine\\Metable\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Kodeine\\Metable\\Tests\\": "tests/"
+    }
+  },
   "minimum-stability": "stable",
-  "license": "MIT"
+  "license": "MIT",
+  "require-dev": {
+    "phpunit/phpunit": "^9.5"
+  }
 }
