@@ -2,7 +2,6 @@
 
 namespace Kodeine\Metable;
 
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as BaseCollection;
 use Illuminate\Support\Str;
@@ -367,10 +366,18 @@ trait Metable
 	 */
 	public function hasColumn($column): bool {
 		static $columns;
-		if ( is_null( $columns ) ) {
-			$columns = array_map( 'strtolower', Schema::connection( $this->getConnectionName() )->getColumnListing( $this->getTable() ) );
+		$class = get_class( $this );
+		if ( ! isset( $columns[$class] ) ) {
+			$columns[$class] = $this->getConnection()->getSchemaBuilder()->getColumnListing( $this->getTable() );
+			if ( empty( $columns[$class] ) ) {
+				$columns[$class] = [];
+			}
+			$columns[$class] = array_map(
+				'strtolower',
+				$columns[$class]
+			);
 		}
-		return in_array( strtolower( $column ), $columns );
+		return in_array( strtolower( $column ), $columns[$class] );
 	}
 	
 	public static function bootMetable() {
