@@ -112,7 +112,7 @@ trait Metable
 		$getMeta = 'getMeta' . ucfirst( strtolower( gettype( $key ) ) );
 		
 		// Default value is used if getMeta is null
-		return $this->$getMeta( $key, $raw ) ?? $this->getMetaDefaultValue( $key );
+		return $this->$getMeta( $key, $raw ) ?? $this->getDefaultMetaValue( $key );
 	}
 	
 	/**
@@ -128,8 +128,8 @@ trait Metable
 	}
 	
 	// Returns either the default value or null if default isn't set
-	private function getMetaDefaultValue($key) {
-		if ( isset( $this->defaultMetaValues ) && array_key_exists( $key, $this->defaultMetaValues ) ) {
+	public function getDefaultMetaValue($key) {
+		if ( property_exists( $this, 'defaultMetaValues' ) && array_key_exists( $key, $this->defaultMetaValues ) ) {
 			return $this->defaultMetaValues[$key];
 		}
 		else {
