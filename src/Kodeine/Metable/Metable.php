@@ -299,6 +299,12 @@ trait Metable
 			return $attr;
 		}
 		
+		// If key is a relation name, then return parent value.
+		// The reason for this is that it's possible that the relation does not exist and parent call returns null for that.
+		if ( $this->isRelation( $key ) && $this->relationLoaded( $key ) ) {
+			return $attr;
+		}
+		
 		// there was no attribute on the model
 		// retrieve the data from meta relationship
 		$meta = $this->getMeta( $key );
