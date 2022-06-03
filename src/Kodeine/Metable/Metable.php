@@ -335,7 +335,7 @@ trait Metable
 		// If there is a default value, remove the meta row instead - future returns of
 		// this value will be handled via the default logic in the accessor
 		if (
-			isset( $this->defaultMetaValues ) &&
+			property_exists( $this, 'defaultMetaValues' ) &&
 			array_key_exists( $key, $this->defaultMetaValues ) &&
 			$this->defaultMetaValues[$key] == $value
 		) {
@@ -421,7 +421,7 @@ trait Metable
 		
 		// Keys with default values always "exist" from the perspective
 		// of the end calling function, even if the DB row doesn't exist
-		if ( isset( $this->defaultMetaValues ) && array_key_exists( $key, $this->defaultMetaValues ) ) {
+		if ( $this->hasDefaultMetaValue( $key ) ) {
 			return true;
 		}
 		
