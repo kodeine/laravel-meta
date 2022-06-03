@@ -74,6 +74,38 @@ trait Metable
 	}
 	
 	/**
+	 * check if meta exists
+	 *
+	 * @param string|array $key
+	 * @return bool
+	 */
+	public function hasMeta($key): bool {
+		if ( is_string( $key ) && preg_match( '/[,|]/is', $key ) ) {
+			$key = preg_split( '/ ?[,|] ?/', $key );
+		}
+		$setMeta = 'hasMeta' . ucfirst( gettype( $key ) );
+		
+		return $this->$setMeta( $key );
+	}
+	
+	protected function hasMetaString($key): bool {
+		$key = strtolower( $key );
+		if ( $this->getMetaData()->has( $key ) ) {
+			return ! $this->getMetaData()[$key]->isMarkedForDeletion();
+		}
+		return false;
+	}
+	
+	protected function hasMetaArray($keys): bool {
+		foreach ($keys as $key) {
+			if ( ! $this->hasMeta( $key ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
 	 * Unset Meta Data functions
 	 * -------------------------.
 	 */
