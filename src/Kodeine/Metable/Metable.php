@@ -274,7 +274,7 @@ trait Metable
 	 * @return array
 	 */
 	public function toArray(): array {
-		return ! empty( $this->hideMeta ) ?
+		return (property_exists( $this, 'hideMeta' ) && $this->hideMeta) ?
 			parent::toArray() :
 			array_merge( parent::toArray(), [
 				'meta_data' => $this->getMeta()->toArray(),
