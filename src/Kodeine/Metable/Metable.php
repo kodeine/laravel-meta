@@ -115,6 +115,18 @@ trait Metable
 		return $this->$getMeta( $key, $raw ) ?? $this->getMetaDefaultValue( $key );
 	}
 	
+	/**
+	 * Check if meta has default value
+	 * @param $key
+	 * @return bool
+	 */
+	public function hasDefaultMetaValue($key): bool {
+		if ( property_exists( $this, 'defaultMetaValues' ) ) {
+			return array_key_exists( $key, $this->defaultMetaValues );
+		}
+		return false;
+	}
+	
 	// Returns either the default value or null if default isn't set
 	private function getMetaDefaultValue($key) {
 		if ( isset( $this->defaultMetaValues ) && array_key_exists( $key, $this->defaultMetaValues ) ) {
