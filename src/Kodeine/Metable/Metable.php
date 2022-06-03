@@ -235,7 +235,7 @@ trait Metable
 	 * @return string
 	 */
 	public function getMetaKeyName(): string {
-		return $this->metaKeyName ?? $this->getForeignKey();
+		return property_exists( $this, 'metaKeyName' ) ? $this->metaKeyName : $this->getForeignKey();
 	}
 	
 	/**
@@ -244,7 +244,7 @@ trait Metable
 	 * @return string
 	 */
 	public function getMetaTable(): string {
-		return $this->metaTable ?? $this->getTable() . '_meta';
+		return property_exists( $this, 'metaTable' ) ? $this->metaTable : $this->getTable() . '_meta';
 	}
 	
 	/**
@@ -253,7 +253,7 @@ trait Metable
 	 * @return string
 	 */
 	protected function getMetaClass(): string {
-		return $this->metaClass ?? MetaData::class;
+		return property_exists( $this, 'metaClass' ) ? $this->metaClass : MetaData::class;
 	}
 	
 	/**
