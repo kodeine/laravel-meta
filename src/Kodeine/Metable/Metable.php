@@ -405,25 +405,4 @@ trait Metable
 			$this->unsetMeta( $key );
 		}
 	}
-	
-	public function __isset($key) {
-		
-		// check parent first.
-		if ( parent::__isset( $key ) === true ) {
-			return true;
-		}
-		
-		
-		// Keys with default values always "exist" from the perspective
-		// of the end calling function, even if the DB row doesn't exist
-		if ( $this->hasDefaultMetaValue( $key ) ) {
-			return true;
-		}
-		
-		// lets check meta data.
-		if ( isset( $this->getMetaData()[$key] ) ) {
-			return ! $this->getMetaData()[$key]->isMarkedForDeletion();
-		}
-		return false;
-	}
 }
