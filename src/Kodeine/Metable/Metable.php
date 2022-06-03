@@ -204,6 +204,7 @@ trait Metable
 			
 			if ( $meta->isMarkedForDeletion() ) {
 				$meta->delete();
+				unset( $this->getMetaData()[$meta->key] );
 				continue;
 			}
 			
@@ -413,6 +414,9 @@ trait Metable
 		}
 		
 		// lets check meta data.
-		return isset( $this->getMetaData()[$key] );
+		if ( isset( $this->getMetaData()[$key] ) ) {
+			return ! $this->getMetaData()[$key]->isMarkedForDeletion();
+		}
+		return false;
 	}
 }
