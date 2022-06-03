@@ -185,17 +185,6 @@ trait Metable
 		return new HasMany( $model->newQuery(), $this, $this->getMetaKeyName(), $this->getKeyName() );
 	}
 	
-	/**
-	 * Query Meta Table functions
-	 * -------------------------.
-	 */
-	public function whereMeta($key, $value) {
-		return $this->getModelStub()
-			->whereKey( strtolower( $key ) )
-			->whereValue( $value )
-			->get();
-	}
-	
 	protected function getModelStub() {
 		// get new meta model instance
 		$classname = $this->getMetaClass();
