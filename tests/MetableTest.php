@@ -205,7 +205,9 @@ class MetableTest extends TestCase
 		$user->save();
 		
 		// re retrieve user to make sure meta is saved
-		$user = User::find( $user->getKey() );
+		$user = User::with( ['metas'] )->find( $user->getKey() );
+		
+		$this->assertTrue( $user->relationLoaded( 'metas' ), 'Metas relation should be loaded' );
 		
 		$this->assertEquals( 'baz', $user->getMeta( 'foo' ), 'Meta method getMeta did not return correct value' );
 		$this->assertEquals( 'bar', $user->getMeta( 'bas' ), 'Meta method getMeta did not return correct value' );
