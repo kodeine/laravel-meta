@@ -66,7 +66,7 @@ This is an example migration. you need change parts of it.
 
 In this example we assume you have a model named `Post`.
 
-Meta table name should be your model's table name + `_meta` which in this case, model's table name is pluralized form of the model. so the table name becomes `posts_meta`.
+Meta table name should be your model's table name + `_meta` which in this case, model's table name is pluralized form of the model name. so the table name becomes `posts_meta`.
 
 If you don't want to follow this naming convention and use something else for table name, make sure you add this name to your model's body:
 
@@ -132,7 +132,7 @@ class Post extends Eloquent
 ```
 
 Metable Trait will automatically set the meta table based on your model name.
-Default meta table name would be, `model_meta`.
+Default meta table name would be, `models_meta` where `models` is pluralized form of the model name.
 In case you need to define your own meta table name, you can specify in model:
 
 ```php
@@ -229,6 +229,13 @@ $post->save();
 
 > **Note:** If a piece of content already has a meta the existing value will be updated.
 
+You can also save metas with `saveMeta` without saving the model itself:
+
+```php
+$post->content = 'some content goes here'; // meta data attribute
+$post->saveMeta(); // will save metas to database but won't save the model itself
+```
+
 #### Unsetting Content Meta
 
 Similarly, you may unset meta from an existing piece of content:
@@ -275,6 +282,20 @@ To see if a piece of content has a meta:
 if (isset($post->content)) {
 
 }
+// or
+if ($post->hasMeta('content')){
+
+}
+```
+
+You may also check if model has multiple metas:
+
+```php
+$post->hasMeta(['content','views']); // returns true only if all the metas exist
+// or
+$post->hasMeta('content|views');
+// or
+$post->hasMeta('content,views');
 ```
 
 #### Retrieving Meta
@@ -302,6 +323,8 @@ Or specify a default value, if not set:
 $post = $post->getMeta('content', 'Something');
 ```
 
+> **Note:** default values set in defaultMetaValues property take precedence over default value passed to this method.
+
 You may also retrieve more than one meta at a time and get an illuminate collection:
 
 ```php
@@ -309,6 +332,29 @@ You may also retrieve more than one meta at a time and get an illuminate collect
 $post = $post->getMeta('content|views');
 // or an array
 $post = $post->getMeta(['content', 'views']);
+// specify default values
+$post->getMeta(['content', 'views'],['content'=>'something','views'=>0]);
+// or specify one default value for all missing metas
+$post->getMeta(['content', 'views'],'none');// result if the metas are missing: ['content'=>'none','views'=>'none']
+// without specifying default value result will be null
+$post->getMeta(['content', 'views']);// result if the metas are missing: ['content'=>null,'views'=>null]
+```
+
+#### Disable fluent
+
+If you don't want access metas in fluent way, you can disable it by adding following property to your model:
+
+```php
+protected $disableFluentMeta = true;
+```
+
+By setting that property, this package will no longer handle metas in the following ways:
+
+```php
+$post->content='something';// will not set meta. original laravel action will be taken
+$post->content;// will not retrieve meta
+unset($post->content);// will not unset meta
+isset($post->content);// will not check if meta exists
 ```
 
 #### Retrieving All Metas
