@@ -1,4 +1,5 @@
 # Fluent Meta Data for Eloquent Models
+
 [![Laravel](https://img.shields.io/badge/Laravel-~8.0-green.svg?style=flat-square)](http://laravel.com)
 [![Source](http://img.shields.io/badge/source-kodeine/laravel--meta-blue.svg?style=flat-square)](https://github.com/kodeine/laravel-meta/)
 [![Build Status](http://img.shields.io/travis/kodeine/laravel--meta/master.svg?style=flat-square)](https://travis-ci.org/kodeine/laravel-meta)
@@ -11,15 +12,56 @@ Metable is Fluent, just like using an eloquent model attribute you can set or un
 
 #### Composer
 
-Add this to your composer.json file, in the require object:
+Laravel can be instsalled on laravel `8.x` or higher.
 
-```javascript
+Run:
+
+```
+composer require kodeine/laravel-meta
+```
+
+For laravel 7.x or below visit [this link](https://github.com/kodeine/laravel-meta/tree/master).
+
+#### Upgrade guide
+
+Change this line in `composer.json`:
+
+```
 "kodeine/laravel-meta": "master"
 ```
 
-After that, run composer install to install the package.
+to:
+
+```
+"kodeine/laravel-meta": "^2.0"
+```
+
+after that, run `composer update` to upgrade the package.
+
+##### Upgrade notice
+
+Laravel meta 2 has some backward incompatible changes that listed below:
+
+1. Laravel 7 or lower not supported.
+2. Removed the following methods: `__get`, `__set`, `__isset`. If you have defined any of these methods, then you probably have something like this in your model:
+
+   ```php
+   class User extends Model{
+       use Metable{
+           __get as __metaGet
+       }
+   ```
+
+   You need to remove `as` operator of the methods.
+3. Removed legacy getter. in older version if you had a method called `getSomething()` then you could access return value of this method using `$model->something`. this is no longer the case, and you have to call `$model->getSomething()`.
+4. Added new method `setAttribute` that overrides parent method.
+5. Renamed `getMetaDefaultValue` method to `getDefaultMetaValue`.
+6. Second parameter of `getMeta` method is now default value when meta is null.
+7. Removed `whereMeta` method in favor of `scopeWhereMeta`. example: `User::whereMeta($key,$value)->get();`
+8. Removed `getModelKey` method.
 
 #### Migration Table Schema
+
 ```php
 /**
 * Run the migrations.
@@ -53,8 +95,8 @@ public function down()
     Schema::drop('posts_meta');
 }
 ```
-## Configuration
 
+## Configuration
 
 #### Model Setup
 
@@ -84,9 +126,8 @@ class Post extends Eloquent
 
 Additionally, you can set default values by setting an array called `$defaultMetaValues` on the model. Setting default has two side-effects:
 
-  1. If a meta attribute does not exist, the default value will be returned instead of `null`.
-
-  2. if you attempt to set a meta attribute to the default value, the row in the meta table will be removed, which will cause the default value to be returned, as per rule 1.
+1. If a meta attribute does not exist, the default value will be returned instead of `null`.
+2. if you attempt to set a meta attribute to the default value, the row in the meta table will be removed, which will cause the default value to be returned, as per rule 1.
 
 This is be the desired and expected functionality for most projects, but be aware that you may need to reimplement default functionality with your own custom accessors and mutators if this functionality does not fit your needs.
 
@@ -99,6 +140,7 @@ This functionality is most suited for meta entries that note exceptions to rules
 ```
 
 #### Gotcha
+
 When you extend a model and still want to use the same meta table you must override `getMetaKeyName` function.
 
 ```
@@ -116,8 +158,6 @@ class Slideshow extends Post
 }
 ```
 
-
-
 ## Working With Meta
 
 #### Setting Content Meta
@@ -125,8 +165,8 @@ class Slideshow extends Post
 To set a meta value on an existing piece of content or create a new data:
 
 > **Fluent way**, You can **set meta flawlessly** as you do on your regular eloquent models.
-Metable checks if attribute belongs to model, if not it will
-access meta model to append or set a new meta.
+> Metable checks if attribute belongs to model, if not it will
+> access meta model to append or set a new meta.
 
 ```php
 $post = Post::find(1);
@@ -222,7 +262,7 @@ if (isset($post->content)) {
 To retrieve a meta value on a piece of content, use the `getMeta` method:
 
 > **Fluent way**, You can access meta data as if it is a property on your model.
-Just like you do on your regular eloquent models.
+> Just like you do on your regular eloquent models.
 
 ```php
 $post = Post::find(1);
