@@ -213,6 +213,18 @@ class MetableTest extends TestCase
 		$user->delete();
 	}
 	
+	public function testDefaultParameterInGetMeta() {
+		$user = new User;
+		
+		$this->assertEquals( 'default_value', $user->getMeta( 'foo', 'default_value' ), 'Default parameter should be returned when meta is null' );
+		$this->assertSame( ['foo' => 'foo_value', 'bar' => 'bar_value'], $user->getMeta( ['foo', 'bar'], ['foo' => 'foo_value', 'bar' => 'bar_value'] )->toArray(), 'Default parameter should be returned when meta is null' );
+		$this->assertSame( ['foo' => 'default_value', 'bar' => 'default_value'], $user->getMeta( ['foo', 'bar'], 'default_value' )->toArray(), 'Default parameter should be returned when meta is null' );
+		
+		$this->assertEquals( 'default_meta_value', $user->getMeta( 'default_meta_key', 'bar' ), 'Default value set in defaultMetaValues property should be returned when meta is null' );
+		$this->assertSame( ['default_meta_key' => 'default_meta_value', 'foo' => 'bar'], $user->getMeta( ['default_meta_key', 'foo'], ['default_meta_key' => 'bar', 'foo' => 'bar'] )->toArray(), 'Default value set in defaultMetaValues property should be returned when meta is null' );
+		$this->assertSame( ['default_meta_key' => 'default_meta_value', 'foo' => 'bar'], $user->getMeta( ['default_meta_key', 'foo'], 'bar' )->toArray(), 'Default value set in defaultMetaValues property should be returned when meta is null' );
+	}
+	
 	public function testHasColumn() {
 		$user = new User;
 		$this->assertTrue( $user->hasColumn( 'name' ), 'User does not have "name" column' );

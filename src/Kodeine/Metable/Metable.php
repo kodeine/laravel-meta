@@ -136,7 +136,7 @@ trait Metable
 	 * -------------------------.
 	 */
 	
-	public function getMeta($key = null, $raw = false) {
+	public function getMeta($key = null, $default = null) {
 		if ( is_string( $key ) && preg_match( '/[,|]/is', $key ) ) {
 			$key = preg_split( '/ ?[,|] ?/', $key );
 		}
@@ -144,7 +144,7 @@ trait Metable
 		$getMeta = 'getMeta' . ucfirst( strtolower( gettype( $key ) ) );
 		
 		// Default value is used if getMeta is null
-		return $this->$getMeta( $key, $raw ) ?? $this->getDefaultMetaValue( $key );
+		return $this->$getMeta( $key, $default );
 	}
 	
 	/**
@@ -169,23 +169,40 @@ trait Metable
 		}
 	}
 	
-	protected function getMetaString($key, $raw = false) {
+	protected function getMetaString($key, $default = null) {
 		$meta = $this->getMetaData()->get( $key );
 		
 		if ( is_null( $meta ) || $meta->isMarkedForDeletion() ) {
-			return null;
+			// Default values set in defaultMetaValues property take precedence over default value passed to this method
+			return $this->getDefaultMetaValue( $key ) ?? $default;
 		}
 		
-		return ($raw) ? $meta : $meta->value;
+		return $meta->value;
 	}
 	
-	protected function getMetaArray($keys, $raw = false): BaseCollection {
+	protected function getMetaArray($keys, $default = null): BaseCollection {
 		$collection = new BaseCollection();
-		
+		$flipped = array_flip( $keys );
 		foreach ($this->getMetaData() as $meta) {
-			if ( ! $meta->isMarkedForDeletion() && in_array( $meta->key, $keys ) ) {
-				$collection->put( $meta->key, $raw ? $meta : $meta->value );
+			if ( ! $meta->isMarkedForDeletion() && isset( $flipped[$meta->key] ) ) {
+				unset( $flipped[$meta->key] );
+				$collection->put( $meta->key, $meta->value );
 			}
+		}
+		// If there are any keys left in $flipped, it means they are not set. so fill them with default values.
+		// Default values set in defaultMetaValues property take precedence over default values passed to this method
+		foreach ($flipped as $key => $value) {
+			$defaultValue = $this->getDefaultMetaValue( $key );
+			if ( is_null( $defaultValue ) ) {
+				if ( is_array( $default ) ) {
+					$defaultValue = $default[$key] ?? null;
+				}
+				else {
+					$defaultValue = $default;
+				}
+			}
+			
+			$collection->put( $key, $defaultValue );
 		}
 		
 		return $collection;
