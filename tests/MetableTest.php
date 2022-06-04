@@ -4,9 +4,12 @@
 
 namespace Kodeine\Metable\Tests;
 
+use stdClass;
+use DateTime;
 use PHPUnit\Framework\TestCase;
 use Kodeine\Metable\Tests\Models\User;
 use Illuminate\Database\Capsule\Manager as Capsule;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class MetableTest extends TestCase
 {
@@ -269,5 +272,61 @@ class MetableTest extends TestCase
 		$user->hideMeta = true;
 		$this->assertArrayNotHasKey( 'meta_data', $user->toArray(), 'Metas should not be included in array' );
 		
+	}
+	
+	public function testMetaDataTypeStoredCorrectly() {
+		$user = new User;
+		$user->setMeta( 'string', 'string' );
+		$user->setMeta( 'integer', 1 );
+		$user->setMeta( 'double', 1.1 );
+		$user->setMeta( 'boolean', true );
+		$user->setMeta( 'array', [1, 2, 3] );
+		$user->setMeta( 'object', new stdClass );
+		$user->setMeta( 'null' );
+		$user->setMeta( 'datetime', new DateTime );
+		
+		$user2 = new User;
+		$user2->save();
+		$user->setMeta( 'model', $user2 );
+		$user->save();
+		// reload user
+		$user = User::find( $user->id );
+		
+		$this->assertEquals( 'string', $user->getMetaData()->get( 'string' )->type );
+		$this->assertEquals( 'string', gettype( $user->getMeta( 'string' ) ) );
+		
+		$this->assertEquals( 'integer', $user->getMetaData()->get( 'integer' )->type );
+		$this->assertEquals( 'integer', gettype( $user->getMeta( 'integer' ) ) );
+		
+		$this->assertEquals( 'double', $user->getMetaData()->get( 'double' )->type );
+		$this->assertEquals( 'double', gettype( $user->getMeta( 'double' ) ) );
+		
+		$this->assertEquals( 'boolean', $user->getMetaData()->get( 'boolean' )->type );
+		$this->assertEquals( 'boolean', gettype( $user->getMeta( 'boolean' ) ) );
+		
+		$this->assertEquals( 'array', $user->getMetaData()->get( 'array' )->type );
+		$this->assertEquals( 'array', gettype( $user->getMeta( 'array' ) ) );
+		
+		$this->assertEquals( 'object', $user->getMetaData()->get( 'object' )->type );
+		$this->assertEquals( 'object', gettype( $user->getMeta( 'object' ) ) );
+		
+		$this->assertEquals( 'NULL', $user->getMetaData()->get( 'null' )->type );
+		$this->assertEquals( 'NULL', gettype( $user->getMeta( 'null' ) ) );
+		
+		$this->assertEquals( 'datetime', $user->getMetaData()->get( 'datetime' )->type );
+		$this->assertInstanceOf( DateTime::class, $user->getMeta( 'datetime' ) );
+		
+		$this->assertEquals( 'model', $user->getMetaData()->get( 'model' )->type );
+		$this->assertInstanceOf( User::class, $user->getMeta( 'model' ) );
+		$this->assertEquals( $user2->id, $user->getMeta( 'model' )->id );
+		
+		$user2->delete();
+		// reload user
+		$user = User::find( $user->id );
+		
+		$this->expectException( ModelNotFoundException::class );
+		$user->getMeta( 'model' );
+		
+		$user->delete();
 	}
 }

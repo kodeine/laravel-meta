@@ -266,7 +266,7 @@ trait Metable
 		}
 	}
 	
-	protected function getMetaData() {
+	public function getMetaData() {
 		if ( is_null( $this->__metaData ) ) {
 			
 			if ( $this->exists && ! is_null( $this->metas ) ) {
