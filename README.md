@@ -62,6 +62,26 @@ Laravel meta 2 has some backward incompatible changes that listed below:
 
 #### Migration Table Schema
 
+This is an example migration. you need change parts of it.
+
+In this example we assume you have a model named `Post`.
+
+Meta table name should be your model's table name + `_meta` which in this case, model's table name is pluralized form of the model. so the table name becomes `posts_meta`.
+
+If you don't want to follow this naming convention and use something else for table name, make sure you add this name to your model's body:
+
+```php
+protected $metaTable = 'custom_meta_table';
+```
+
+the foreign key name should be your model's name + `_id` = `post_id`
+
+If you used something else for foreign key, make sure you add this to your model's body:
+
+```php
+protected $metaKeyName = 'custom_foreign_key';
+```
+
 ```php
 /**
 * Run the migrations.
