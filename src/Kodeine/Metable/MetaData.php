@@ -27,6 +27,8 @@ class MetaData extends Model
 	 */
 	protected $markForDeletion = false;
 	
+	protected $modelCache = [];
+	
 	/**
 	 * Whether or not to delete the Data on save.
 	 *
@@ -63,7 +65,10 @@ class MetaData extends Model
 		}
 		elseif ( $value instanceof Model ) {
 			$this->type = 'model';
-			$this->attributes['value'] = get_class( $value ) . (! $value->exists ? '' : '#' . $value->getKey());
+			$class = get_class( $value );
+			$this->attributes['value'] = $class . (! $value->exists ? '' : '#' . $value->getKey());
+			// Update the cache
+			$this->modelCache[$class][$value->getKey()] = $value;
 		}
 		elseif ( is_object( $value ) ) {
 			$this->type = 'object';
@@ -93,7 +98,7 @@ class MetaData extends Model
 				
 				list( $class, $id ) = explode( '#', $value );
 				
-				return with( new $class() )->findOrFail( $id );
+				return $this->resolveModelInstance( $class, $id );
 			}
 		}
 		
@@ -102,5 +107,15 @@ class MetaData extends Model
 		}
 		
 		return $value;
+	}
+	
+	protected function resolveModelInstance($model, $Key) {
+		if ( ! isset( $this->modelCache[$model] ) ) {
+			$this->modelCache[$model] = [];
+		}
+		if ( ! isset( $this->modelCache[$model][$Key] ) ) {
+			$this->modelCache[$model][$Key] = (new $model())->findOrFail( $Key );
+		}
+		return $this->modelCache[$model][$Key];
 	}
 }

@@ -320,6 +320,10 @@ class MetableTest extends TestCase
 		$this->assertInstanceOf( User::class, $user->getMeta( 'model' ) );
 		$this->assertEquals( $user2->id, $user->getMeta( 'model' )->id );
 		
+		$hash1 = spl_object_hash( $user->getMeta( 'model' ) );
+		$hash2 = spl_object_hash( $user->getMeta( 'model' ) );
+		$this->assertEquals( $hash1, $hash2 );
+		
 		$user2->delete();
 		// reload user
 		$user = User::find( $user->id );
