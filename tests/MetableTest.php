@@ -104,6 +104,31 @@ class MetableTest extends TestCase
 		$this->assertEquals( 0, $metaData->count(), 'Meta should be deleted from database after deleting user.' );
 	}
 	
+	public function testDisableFluentMeta() {
+		$user = new User;
+		$user->disableFluentMeta = true;
+		
+		$user->foo = 'bar';
+		
+		$this->assertNull( $user->getMeta( 'foo' ), 'Meta should be null.' );
+		$this->assertFalse( $user->hasMeta( 'foo' ), 'Meta should not be set.' );
+		
+		$user->setMeta( 'foo', 'baz' );
+		
+		$this->assertNotEquals( 'baz', $user->foo, 'Fluent getter should not be changed.' );
+		$this->assertEquals( 'baz', $user->getMeta( 'foo' ), 'meta should be set.' );
+		
+		unset( $user->foo );
+		
+		$this->assertEquals( 'baz', $user->getMeta( 'foo' ), 'meta should be set.' );
+		
+		$user->foo = 'bar';
+		$user->unsetMeta( 'foo' );
+		
+		$this->assertNull( $user->getMeta( 'foo' ), 'meta should not be set.' );
+		$this->assertEquals( 'bar', $user->foo, 'Fluent getter should not be changed.' );
+	}
+	
 	public function testScopes() {
 		$user1 = new User;
 		$user1->foo = 'bar';

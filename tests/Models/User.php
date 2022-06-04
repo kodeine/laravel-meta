@@ -17,6 +17,8 @@ class User extends Model
 	
 	public $hideMeta = false;
 	
+	public $disableFluentMeta = false;
+	
 	/**
 	 * This is dummy relation to itself.
 	 *

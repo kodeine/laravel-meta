@@ -337,6 +337,11 @@ trait Metable
 			return $attr;
 		}
 		
+		// Don't get meta data if fluent access is disabled.
+		if ( property_exists( $this, 'disableFluentMeta' ) && $this->disableFluentMeta ) {
+			return $attr;
+		}
+		
 		// If key is a relation name, then return parent value.
 		// The reason for this is that it's possible that the relation does not exist and parent call returns null for that.
 		if ( $this->isRelation( $key ) && $this->relationLoaded( $key ) ) {
@@ -360,6 +365,11 @@ trait Metable
 	 * @inheritDoc
 	 */
 	public function setAttribute($key, $value) {
+		// Don't set meta data if fluent access is disabled.
+		if ( property_exists( $this, 'disableFluentMeta' ) && $this->disableFluentMeta ) {
+			return parent::setAttribute( $key, $value );
+		}
+		
 		// First we will check for the presence of a mutator
 		// or if key is a model attribute or has a column named to the key
 		if ( $this->hasSetMutator( $key ) ||
@@ -371,9 +381,7 @@ trait Metable
 			$this->hasColumn( $key ) ||
 			array_key_exists( $key, parent::getAttributes() )
 		) {
-			parent::setAttribute( $key, $value );
-			
-			return;
+			return parent::setAttribute( $key, $value );
 		}
 		
 		// If there is a default value, remove the meta row instead - future returns of
@@ -385,20 +393,18 @@ trait Metable
 		) {
 			$this->unsetMeta( $key );
 			
-			return;
+			return $this;
 		}
 		
 		// if the key has a mutator execute it
 		$mutator = Str::camel( 'set_' . $key . '_meta' );
 		
 		if ( method_exists( $this, $mutator ) ) {
-			$this->{$mutator}( $value );
-			
-			return;
+			return $this->{$mutator}( $value );
 		}
 		
 		// key doesn't belong to model, lets create a new meta relationship
-		$this->setMetaString( $key, $value );
+		return $this->setMetaString( $key, $value );
 	}
 	
 	/**
@@ -446,6 +452,11 @@ trait Metable
 	public function __unset($key) {
 		// unset attributes and relations
 		parent::__unset( $key );
+		
+		// Don't unset meta data if fluent access is disabled.
+		if ( property_exists( $this, 'disableFluentMeta' ) && $this->disableFluentMeta ) {
+			return;
+		}
 		
 		// delete meta, only if pivot-prefix is not detected in order to avoid unnecessary (N+1) queries
 		// since Eloquent tries to "unset" pivot-prefixed attributes in m2m queries on pivot tables.
