@@ -12,7 +12,7 @@ Metable is Fluent, just like using an eloquent model attribute you can set or un
 
 #### Composer
 
-Laravel can be instsalled on laravel `8.x` or higher.
+Laravel can be installed on laravel `8.x` or higher.
 
 Run:
 
@@ -124,14 +124,14 @@ class Post extends Eloquent
 
 #### Default Model Attribute values
 
-Additionally, you can set default values by setting an array called `$defaultMetaValues` on the model. Setting default has two side-effects:
+Additionally, you can set default values by setting an array called `$defaultMetaValues` on the model. Setting default has two side effects:
 
 1. If a meta attribute does not exist, the default value will be returned instead of `null`.
 2. if you attempt to set a meta attribute to the default value, the row in the meta table will be removed, which will cause the default value to be returned, as per rule 1.
 
-This is be the desired and expected functionality for most projects, but be aware that you may need to reimplement default functionality with your own custom accessors and mutators if this functionality does not fit your needs.
+This is being the desired and expected functionality for most projects, but be aware that you may need to reimplement default functionality with your own custom accessors and mutators if this functionality does not fit your needs.
 
-This functionality is most suited for meta entries that note exceptions to rules. For example: employees sick out of office (default value: in office), nodes taken down for maintance (default value: node up), etc. This means the table doesn't need to store data on every entry which is in the expected state, only those rows in the exceptional state, and allows the rows to have a default state upon creation without needing to add code to write it.
+This functionality is most suited for meta entries that note exceptions to rules. For example: employees sick out of office (default value: in office), nodes taken down for maintenance (default value: node up), etc. This means the table doesn't need to store data on every entry which is in the expected state, only those rows in the exceptional state, and allows the rows to have a default state upon creation without needing to add code to write it.
 
 ```
    public $defaultMetaValues = [
@@ -323,7 +323,7 @@ $post = Post::meta()
 
 #### Eager Loading
 
-When you need to retrive multiple results from your model, you can eager load `metas`
+When you need to retrieve multiple results from your model, you can eager load `metas`
 
 ```php
 $post = Post::with(['metas'])->get();
