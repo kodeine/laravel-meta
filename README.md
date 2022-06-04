@@ -91,9 +91,9 @@ protected $metaKeyName = 'custom_foreign_key';
 public function up()
 {
     Schema::create('posts_meta', function (Blueprint $table) {
-        $table->increments('id');
+        $table->bigIncrements('id');
 
-        $table->integer('post_id')->unsigned()->index();
+        $table->bigInteger('post_id')->unsigned();
         $table->foreign('post_id')->references('id')->on('posts')->onDelete('cascade');
 
         $table->string('type')->default('null');
