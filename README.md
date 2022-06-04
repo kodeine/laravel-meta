@@ -344,9 +344,9 @@ $post->getMeta(['content', 'views'],'none');// result if the metas are missing: 
 $post->getMeta(['content', 'views']);// result if the metas are missing: ['content'=>null,'views'=>null]
 ```
 
-#### Disable fluent
+#### Disable fluent access
 
-If you don't want access metas in fluent way, you can disable it by adding following property to your model:
+If you don't want to access metas in fluent way, you can disable it by adding following property to your model:
 
 ```php
 protected $disableFluentMeta = true;
