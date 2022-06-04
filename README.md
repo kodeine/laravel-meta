@@ -8,6 +8,10 @@
 Metable Trait adds the ability to access meta data as if it is a property on your model.
 Metable is Fluent, just like using an eloquent model attribute you can set or unset metas. Follow along the documentation to find out more.
 
+## Changelog
+
+visit [CHANGELOG.md](CHANGELOG.md)
+
 ## Installation
 
 #### Composer
