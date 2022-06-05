@@ -176,6 +176,16 @@ class MetableTest extends TestCase
 		
 		$this->assertNull( $metaData->first(), 'Default value should be removed from database.' );
 		
+		$user->setMeta( 'default_meta_key', 'foo' );
+		$user->save();
+		
+		$this->assertEquals( 'foo', is_null( $meta = $metaData->first() ) ? null : $meta->value, 'Default value should be changed in database.' );
+		
+		$user->setMeta( 'default_meta_key', 'default_meta_value' );
+		$user->save();
+		
+		$this->assertNull( $metaData->first(), 'Default value should be removed from database.' );
+		
 		$user->delete();
 	}
 	

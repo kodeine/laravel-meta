@@ -45,6 +45,19 @@ trait Metable
 	
 	protected function setMetaString($key, $value) {
 		$key = strtolower( $key );
+		
+		// If there is a default value, remove the meta row instead - future returns of
+		// this value will be handled via the default logic in the accessor
+		if (
+			property_exists( $this, 'defaultMetaValues' ) &&
+			array_key_exists( $key, $this->defaultMetaValues ) &&
+			$this->defaultMetaValues[$key] == $value
+		) {
+			$this->unsetMeta( $key );
+			
+			return $this;
+		}
+		
 		if ( $this->getMetaData()->has( $key ) ) {
 			
 			// Make sure deletion marker is not set
