@@ -1,35 +1,46 @@
 {
-    "name": "kodeine/laravel-meta",
-    "description": "Fluent Meta Data for Eloquent Models, as if it is a property on your model.",
-    "keywords": [
-        "laravel",
-        "meta",
-        "metas",
-        "meta data",
-        "data",
-        "metadata",
-        "metable",
-        "model",
-        "eloquent",
-        "kodeine"
-    ],
-    "authors": [
-        {
-            "name": "Ahsen M.",
-            "homepage": "https://github.com/kodeine",
-            "role": "Developer"
-        }
-    ],
-    "require": {
-        "php": ">=5.4.0",
-        "illuminate/support": "~5.0|~5.1|^6.0|^7.0|^8.0|^9.0"
-    },
-    "autoload": {
-        "classmap": [],
-        "psr-0": {
-            "Kodeine\\Metable\\": "src/"
-        }
-    },
-    "minimum-stability": "stable",
-    "license": "MIT"
+  "name": "kodeine/laravel-meta",
+  "description": "Fluent Meta Data for Eloquent Models, as if it is a property on your model.",
+  "keywords": [
+    "laravel",
+    "meta",
+    "metas",
+    "meta data",
+    "data",
+    "metadata",
+    "metable",
+    "model",
+    "eloquent",
+    "kodeine"
+  ],
+  "authors": [
+    {
+      "name": "Ahsen M.",
+      "homepage": "https://github.com/kodeine",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": ">=7.3",
+    "illuminate/support": "^8.0|^9.0",
+    "illuminate/database": "^8.0|^9.0",
+    "illuminate/events": "^8.0|^9.0",
+    "ext-json": "*"
+  },
+  "autoload": {
+    "classmap": [],
+    "psr-0": {
+      "Kodeine\\Metable\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Kodeine\\Metable\\Tests\\": "tests/"
+    }
+  },
+  "minimum-stability": "stable",
+  "license": "MIT",
+  "require-dev": {
+    "phpunit/phpunit": "^9.5"
+  }
 }
