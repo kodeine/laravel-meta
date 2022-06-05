@@ -96,9 +96,9 @@ trait Metable
 		if ( is_string( $key ) && preg_match( '/[,|]/is', $key ) ) {
 			$key = preg_split( '/ ?[,|] ?/', $key );
 		}
-		$setMeta = 'hasMeta' . ucfirst( gettype( $key ) );
+		$hasMeta = 'hasMeta' . ucfirst( gettype( $key ) );
 		
-		return $this->$setMeta( $key );
+		return $this->$hasMeta( $key );
 	}
 	
 	protected function hasMetaString($key): bool {
