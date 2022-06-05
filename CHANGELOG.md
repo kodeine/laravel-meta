@@ -18,6 +18,7 @@
 * Removed legacy getter.
 * Removed `whereMeta` method in favor of `scopeWhereMeta`.
 * Renamed `getMetaDefaultValue` method to `getDefaultMetaValue`.
+* You can now set meta names starting with `meta`.
 * Changed `saveMeta` method's visibility to public.
 * Changed `getMetaData` method's visibility to public.
 * Fluent setter will now check for any cast or mutator.
