@@ -195,16 +195,18 @@ trait Metable
 	
 	protected function getMetaArray($keys, $default = null): BaseCollection {
 		$collection = new BaseCollection();
-		$flipped = array_flip( $keys );
-		foreach ($this->getMetaData() as $meta) {
-			if ( ! $meta->isMarkedForDeletion() && isset( $flipped[$meta->key] ) ) {
-				unset( $flipped[$meta->key] );
-				$collection->put( $meta->key, $meta->value );
+		
+		foreach ($keys as $key) {
+			$key = strtolower( $key );
+			if ( $this->hasMeta( $key ) ) {
+				$meta = $this->getMetaData()[$key];
+				if ( ! $meta->isMarkedForDeletion() ) {
+					$collection->put( $key, $meta->value );
+					continue;
+				}
 			}
-		}
-		// If there are any keys left in $flipped, it means they are not set. so fill them with default values.
-		// Default values set in defaultMetaValues property take precedence over default values passed to this method
-		foreach ($flipped as $key => $value) {
+			// Key does not exist, so it's value will be the default value
+			// Default values set in defaultMetaValues property take precedence over default value passed to this method
 			$defaultValue = $this->getDefaultMetaValue( $key );
 			if ( is_null( $defaultValue ) ) {
 				if ( is_array( $default ) ) {
