@@ -183,6 +183,7 @@ trait Metable
 	}
 	
 	protected function getMetaString($key, $default = null) {
+		$key = strtolower( $key );
 		$meta = $this->getMetaData()->get( $key );
 		
 		if ( is_null( $meta ) || $meta->isMarkedForDeletion() ) {
