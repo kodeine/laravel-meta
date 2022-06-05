@@ -54,6 +54,7 @@ class MetableTest extends TestCase
 		$user = new User;
 		
 		$this->assertNull( $user->foo, 'Meta should be null by default' );
+		$this->assertFalse( $user->isMetaDirty( 'foo' ), 'Meta should not be dirty before assigning value.' );
 		
 		$user->foo = 'bar';
 		
@@ -61,6 +62,7 @@ class MetableTest extends TestCase
 		$this->assertTrue( isset( $user->foo ), 'Fluent meta should be set before save.' );
 		$this->assertEquals( 'bar', $user->foo, 'Fluent setter not working before save.' );
 		$this->assertEquals( 0, Capsule::table( 'users_meta' )->count(), 'Fluent setter should not save to database before save.' );
+		$this->assertTrue( $user->isMetaDirty( 'foo' ), 'Meta should be dirty before save.' );
 		
 		$this->assertNull( $user->dummy, 'Dummy relation should be null by default' );
 		$this->dummy = 'dummy';
@@ -74,6 +76,7 @@ class MetableTest extends TestCase
 		$this->assertTrue( isset( $user->foo ), 'Fluent meta should be set.' );
 		$this->assertEquals( 'bar', $user->foo, 'Fluent setter not working.' );
 		$this->assertEquals( 'bar', is_null( $meta = $metaData->first() ) ? null : $meta->value, 'Fluent setter did not save meta to database.' );
+		$this->assertFalse( $user->isMetaDirty( 'foo' ), 'Meta should not be dirty after save.' );
 		
 		$user->foo = 'baz';
 		
@@ -92,6 +95,7 @@ class MetableTest extends TestCase
 		$this->assertEquals( 'baz', is_null( $meta = $metaData->first() ) ? null : $meta->value, 'Fluent unsetter should not remove meta from database before save.' );
 		$this->assertEquals( 1, $metaData->count(), 'Fluent unsetter should not remove meta from database before save.' );
 		$this->assertFalse( isset( $user->foo ), 'Fluent meta should not be set before save.' );
+		$this->assertTrue( $user->isMetaDirty( 'foo' ), 'Meta should be dirty before save.' );
 		
 		$user->save();
 		
@@ -99,6 +103,7 @@ class MetableTest extends TestCase
 		$this->assertNull( $metaData->first(), 'Fluent unsetter did not remove meta from database.' );
 		$this->assertEquals( 0, $metaData->count(), 'Fluent unsetter did not remove meta from database.' );
 		$this->assertFalse( isset( $user->foo ), 'Fluent meta should not be set.' );
+		$this->assertFalse( $user->isMetaDirty( 'foo' ), 'Meta should not be dirty after save.' );
 		
 		$user->foo = 'bar';
 		$user->save();

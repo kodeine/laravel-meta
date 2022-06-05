@@ -119,6 +119,34 @@ trait Metable
 	}
 	
 	/**
+	 * Determine if the meta or any of the given metas have been modified.
+	 *
+	 * @param array|string|null $metas
+	 * @return bool
+	 */
+	public function isMetaDirty(...$metas): bool {
+		if ( empty( $metas ) ) {
+			foreach ($this->getMetaData() as $meta) {
+				if ( $meta->isDirty( 'value' ) ) {
+					return true;
+				}
+			}
+		}
+		
+		foreach ($metas as $meta) {
+			if ( $this->getMetaData()->has( $meta ) ) {
+				if ( $this->getMetaData()[$meta]->isDirty( 'value' ) ) {
+					return true;
+				}
+				if ( $this->getMetaData()[$meta]->isMarkedForDeletion() ) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	/**
 	 * Unset Meta Data functions
 	 * -------------------------.
 	 */
