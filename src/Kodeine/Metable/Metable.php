@@ -21,7 +21,7 @@ trait Metable
 	 */
 	public function scopeWhereMeta($query, $key, $value, $alias = null) {
 		$alias = (empty( $alias )) ? $this->getMetaTable() : $alias;
-		return $query->join( $this->getMetaTable() . ' AS ' . $alias, $this->getQualifiedKeyName(), '=', $alias . '.' . $this->getMetaKeyName() )->where( 'key', '=', $key )->where( 'value', '=', $value )->select( $this->getTable() . '.*' );
+		return $query->join( $this->getMetaTable() . ' AS ' . $alias, $this->getQualifiedKeyName(), '=', $alias . '.' . $this->getMetaKeyName() )->where( $alias . '.key', '=', $key )->where( $alias . '.value', '=', $value )->select( $this->getTable() . '.*' );
 	}
 	
 	/**
