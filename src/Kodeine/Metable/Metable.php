@@ -300,11 +300,21 @@ trait Metable
 			}
 			
 			if ( $meta->isDirty() ) {
+				if ( $this->fireMetaEvent( 'saving', $meta->key ) === false ) {
+					continue;
+				}
 				// set meta and model relation id's into meta table.
 				$meta->setAttribute( $this->getMetaKeyName(), $this->getKey() );
 				$meta->save();
 			}
 		}
+	}
+	
+	protected function fireMetaEvent($event, $metaName, bool $halt = true) {
+		if ( method_exists( $this, '__fireMetaEvent' ) ) {
+			return $this->__fireMetaEvent( 'meta' . Str::ucfirst( $event ), $metaName, $halt );
+		}
+		return true;
 	}
 	
 	public function getMetaData() {
