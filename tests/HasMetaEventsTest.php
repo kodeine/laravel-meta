@@ -7,13 +7,15 @@ namespace Kodeine\Metable\Tests;
 use PHPUnit\Framework\TestCase;
 use Kodeine\Metable\Tests\Models\Event;
 use Kodeine\Metable\Tests\Events\MetaSaving;
+use Kodeine\Metable\Tests\Events\MetaUpdating;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Kodeine\Metable\Tests\Observers\EventObserver;
 use Kodeine\Metable\Tests\Listeners\HandleMetaSaving;
+use Kodeine\Metable\Tests\Listeners\HandleMetaUpdating;
 
 class HasMetaEventsTest extends TestCase
 {
-	protected function setUp(): void {
+	public static function setUpBeforeClass(): void {
 		$capsule = new Capsule;
 		$capsule->addConnection( [
 			'driver' => 'sqlite',
@@ -42,11 +44,15 @@ class HasMetaEventsTest extends TestCase
 			$table->timestamps();
 		} );
 		
+		$event = new Event;
 		Event::observe( EventObserver::class );
 		
 		$listen = [
 			MetaSaving::class => [
 				HandleMetaSaving::class,
+			],
+			MetaUpdating::class => [
+				HandleMetaUpdating::class,
 			],
 		];
 		foreach ($listen as $event => $listeners) {
@@ -60,7 +66,7 @@ class HasMetaEventsTest extends TestCase
 		$eventName = 'metaSaving';
 		$event = new Event;
 		
-		$this->assertContains( 'metaSaving', $event->getObservableEvents(), "$eventName event should be observable" );
+		$this->assertContains( $eventName, $event->getObservableEvents(), "$eventName event should be observable" );
 		
 		$event->foo = 'bar';
 		$event->save();
@@ -103,5 +109,38 @@ class HasMetaEventsTest extends TestCase
 		$event->save();
 		
 		$this->assertFalse( $event->isMetaDirty( 'bar' ), "Meta should not be dirty" );
+		
+		$event->delete();
+	}
+	
+	public function testMetaUpdatingEvent() {
+		$eventName = 'metaUpdating';
+		$event = new Event;
+		
+		$this->assertContains( $eventName, $event->getObservableEvents(), "$eventName event should be observable" );
+		
+		$event->foo = 'bar';
+		$event->save();
+		
+		$this->assertNotContains( 'foo', $event->listenersChanges[$eventName] ?? [], "$eventName event should not be fired when meta didn't exist before" );
+		$this->assertNotContains( 'foo', $event->observersChanges[$eventName] ?? [], "$eventName event should not be fired when meta didn't exist before" );
+		$this->assertNotContains( 'foo', $event->classListenersChanges[$eventName] ?? [], "$eventName event should not be fired when meta didn't exist before" );
+		
+		$event->foo = 'foobar';
+		$event->save();
+		
+		$this->assertContains( 'foo', $event->listenersChanges[$eventName] ?? [], "$eventName event should be fired" );
+		$this->assertCount( 1, $event->listenersChanges[$eventName] ?? [], "$eventName event should be fired only once" );
+		$this->assertContains( 'foo', $event->observersChanges[$eventName] ?? [], "$eventName event should be fired by observer" );
+		$this->assertCount( 1, $event->observersChanges[$eventName] ?? [], "$eventName event should be fired by observer only once" );
+		$this->assertContains( 'foo', $event->classListenersChanges[$eventName] ?? [], "$eventName event should be fired by class listener" );
+		$this->assertCount( 1, $event->classListenersChanges[$eventName] ?? [], "$eventName event should be fired by class listener only once" );
+		$this->assertFalse( $event->isMetaDirty( 'bar' ), "Meta should not be dirty" );
+		
+		$event->bar = 'bar';
+		
+		$this->assertTrue( $event->isMetaDirty( 'bar' ), "Meta should be dirty" );
+		
+		$event->delete();
 	}
 }

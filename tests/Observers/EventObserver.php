@@ -10,6 +10,10 @@ class EventObserver
 		return $this->genericObserver( $model, $meta, __FUNCTION__ );
 	}
 	
+	public function metaUpdating(Event $model, $meta) {
+		return $this->genericObserver( $model, $meta, __FUNCTION__ );
+	}
+	
 	protected function genericObserver(Event $model, $meta, $eventName) {
 		if ( ! isset( $model->observersChanges[$eventName] ) ) {
 			$model->observersChanges[$eventName] = [];

@@ -309,6 +309,11 @@ trait Metable
 				if ( $this->fireMetaEvent( 'saving', $meta->key ) === false ) {
 					continue;
 				}
+				if ( $meta->exists ) {
+					if ( $this->fireMetaEvent( 'updating', $meta->key ) === false ) {
+						continue;
+					}
+				}
 				// set meta and model relation id's into meta table.
 				$meta->setAttribute( $this->getMetaKeyName(), $this->getKey() );
 				$meta->save();

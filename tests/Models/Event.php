@@ -7,6 +7,7 @@ use Illuminate\Events\Dispatcher;
 use Kodeine\Metable\HasMetaEvents;
 use Illuminate\Database\Eloquent\Model;
 use Kodeine\Metable\Tests\Events\MetaSaving;
+use Kodeine\Metable\Tests\Events\MetaUpdating;
 
 class Event extends Model
 {
@@ -21,6 +22,7 @@ class Event extends Model
 	
 	protected $dispatchesEvents = [
 		'metaSaving' => MetaSaving::class,
+		'metaUpdating' => MetaUpdating::class,
 	];
 	
 	public static function boot() {
@@ -39,6 +41,10 @@ class Event extends Model
 		
 		static::metaSaving( function (Event $model, $meta) use ($listener) {
 			return $listener( $model, $meta, 'metaSaving' );
+		} );
+		
+		static::metaUpdating( function (Event $model, $meta) use ($listener) {
+			return $listener( $model, $meta, 'metaUpdating' );
 		} );
 	}
 }

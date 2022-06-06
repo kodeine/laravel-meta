@@ -50,10 +50,15 @@ trait HasMetaEvents
 	protected function initializeHasMetaEvents() {
 		$this->observables = array_merge( $this->observables, [
 			'metaSaving',
+			'metaUpdating',
 		] );
 	}
 	
 	public static function metaSaving($callback) {
 		static::registerModelEvent( 'metaSaving', $callback );
+	}
+	
+	public static function metaUpdating($callback) {
+		static::registerModelEvent( 'metaUpdating', $callback );
 	}
 }
