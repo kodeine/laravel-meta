@@ -1,5 +1,11 @@
 # Release Notes
 
+## v2.0.1
+
+### Changes
+
+* Improved `getMetaArray` method by removing linear search from `getMetaArray`
+
 ## v2.0.0
 
 ### Added
