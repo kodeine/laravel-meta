@@ -107,6 +107,14 @@ class MetableTest extends TestCase
 		
 		$user->foo = 'bar';
 		$user->save();
+		
+		$user->bar = 'foo';
+		
+		$this->assertTrue( $user->isMetaDirty(), 'isMetaDirty should return true even if one of metas has changed' );
+		$this->assertTrue( $user->isMetaDirty( ['foo', 'bar'] ), 'isMetaDirty should return true even if one of metas has changed' );
+		$this->assertTrue( $user->isMetaDirty( 'foo', 'bar' ), 'isMetaDirty should return true even if one of metas has changed' );
+		$this->assertTrue( $user->isMetaDirty( 'foo,bar' ), 'isMetaDirty should return true even if one of metas has changed' );
+		
 		$user->delete();
 		
 		$this->assertEquals( 0, $metaData->count(), 'Meta should be deleted from database after deleting user.' );

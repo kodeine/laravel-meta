@@ -127,15 +127,21 @@ trait Metable
 	public function isMetaDirty(...$metas): bool {
 		if ( empty( $metas ) ) {
 			foreach ($this->getMetaData() as $meta) {
-				if ( $meta->isDirty( 'value' ) ) {
+				if ( $meta->isDirty() ) {
 					return true;
 				}
 			}
 		}
+		if ( is_array( $metas[0] ) ) {
+			$metas = $metas[0];
+		}
+		elseif ( is_string( $metas[0] ) && preg_match( '/[,|]/is', $metas[0] ) ) {
+			$metas = preg_split( '/ ?[,|] ?/', $metas[0] );
+		}
 		
 		foreach ($metas as $meta) {
 			if ( $this->getMetaData()->has( $meta ) ) {
-				if ( $this->getMetaData()[$meta]->isDirty( 'value' ) ) {
+				if ( $this->getMetaData()[$meta]->isDirty() ) {
 					return true;
 				}
 				if ( $this->getMetaData()[$meta]->isMarkedForDeletion() ) {
