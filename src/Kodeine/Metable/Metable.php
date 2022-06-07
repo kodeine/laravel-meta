@@ -301,6 +301,11 @@ trait Metable
 			$meta->setTable( $this->getMetaTable() );
 			
 			if ( $meta->isMarkedForDeletion() ) {
+				if ( $meta->exists ) {
+					if ( $this->fireMetaEvent( 'deleting', $meta->key ) === false ) {
+						continue;
+					}
+				}
 				$meta->delete();
 				unset( $this->getMetaData()[$meta->key] );
 				continue;

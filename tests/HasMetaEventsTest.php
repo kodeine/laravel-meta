@@ -10,8 +10,10 @@ use Kodeine\Metable\Tests\Events\MetaSavingTestEvent;
 use Kodeine\Metable\Tests\Events\MetaUpdatingTestEvent;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Kodeine\Metable\Tests\Observers\EventObserver;
+use Kodeine\Metable\Tests\Events\MetaDeletingTestEvent;
 use Kodeine\Metable\Tests\Listeners\HandleMetaSavingTestEvent;
 use Kodeine\Metable\Tests\Listeners\HandleMetaUpdatingTestEvent;
+use Kodeine\Metable\Tests\Listeners\HandleMetaDeletingTestEvent;
 
 class HasMetaEventsTest extends TestCase
 {
@@ -55,6 +57,9 @@ class HasMetaEventsTest extends TestCase
 			],
 			MetaUpdatingTestEvent::class => [
 				HandleMetaUpdatingTestEvent::class,
+			],
+			MetaDeletingTestEvent::class => [
+				HandleMetaDeletingTestEvent::class,
 			],
 		];
 		foreach ($listen as $event => $listeners) {
@@ -142,6 +147,73 @@ class HasMetaEventsTest extends TestCase
 		$event->bar = 'bar';
 		
 		$this->assertTrue( $event->isMetaDirty( 'bar' ), "Meta should be dirty" );
+		
+		$event->delete();
+	}
+	
+	public function testMetaDeletingEvent() {
+		$eventName = 'metaDeleting';
+		$event = new EventTest;
+		
+		$this->assertContains( $eventName, $event->getObservableEvents(), "$eventName event should be observable" );
+		
+		$event->foo = 'bar';
+		
+		$event->unsetMeta( 'foo' );
+		$event->save();
+		
+		$this->assertNotContains( 'foo', $event->listenersChanges[$eventName] ?? [], "$eventName event should not be fired" );
+		$this->assertNotContains( 'foo', $event->observersChanges[$eventName] ?? [], "$eventName event should not be fired" );
+		$this->assertNotContains( 'foo', $event->classListenersChanges[$eventName] ?? [], "$eventName event should not be fired" );
+		$this->assertFalse( $event->hasMeta( 'foo' ), "Meta should not exist" );
+		
+		$event->foo = 'bar';
+		$event->saveMeta();
+		$event->unsetMeta( 'foo' );
+		$event->save();
+		
+		$this->assertContains( 'foo', $event->listenersChanges[$eventName] ?? [], "$eventName event should be fired" );
+		$this->assertCount( 1, $event->listenersChanges[$eventName] ?? [], "$eventName event should be fired only once" );
+		$this->assertContains( 'foo', $event->observersChanges[$eventName] ?? [], "$eventName event should be fired by observer" );
+		$this->assertCount( 1, $event->observersChanges[$eventName] ?? [], "$eventName event should be fired by observer only once" );
+		$this->assertContains( 'foo', $event->classListenersChanges[$eventName] ?? [], "$eventName event should be fired by class listener" );
+		$this->assertCount( 1, $event->classListenersChanges[$eventName] ?? [], "$eventName event should be fired by class listener only once" );
+		$this->assertFalse( $event->hasMeta( 'foo' ), "Meta should not exist" );
+		
+		$event->bar = 'bar';
+		$event->save();
+		$event->listenerShouldReturnFalse = true;
+		$event->unsetMeta( 'bar' );
+		$event->save();
+		
+		$metaData = Capsule::table( $event->getMetaTable() )->where( $event->getMetaKeyName(), $event->getKey() )->where( 'key', 'bar' );
+		
+		$this->assertContains( 'bar', $event->listenersChanges[$eventName] ?? [], "$eventName event should be fired" );
+		$this->assertTrue( $event->getMetaData()->has( 'bar' ), "Meta should exist" );
+		$this->assertFalse( $event->hasMeta( 'bar' ), "Meta should not exist because it is marked for deletion" );
+		$this->assertNotNull( $metaData->first(), "Meta should not be removed" );
+		
+		$event->listenerShouldReturnFalse = false;
+		$event->observersShouldReturnFalse = true;
+		$event->save();
+		
+		$this->assertTrue( $event->getMetaData()->has( 'bar' ), "Meta should exist" );
+		$this->assertFalse( $event->hasMeta( 'bar' ), "Meta should not exist because it is marked for deletion" );
+		$this->assertNotNull( $metaData->first(), "Meta should not be removed" );
+		
+		$event->observersShouldReturnFalse = false;
+		$event->classListenersShouldReturnFalse = true;
+		$event->save();
+		
+		$this->assertTrue( $event->getMetaData()->has( 'bar' ), "Meta should exist" );
+		$this->assertFalse( $event->hasMeta( 'bar' ), "Meta should not exist because it is marked for deletion" );
+		$this->assertNotNull( $metaData->first(), "Meta should not be removed" );
+		
+		$event->classListenersShouldReturnFalse = false;
+		$event->save();
+		
+		$this->assertFalse( $event->getMetaData()->has( 'bar' ), "Meta should not exist" );
+		$this->assertNull( $metaData->first(), "Meta should be removed" );
 		
 		$event->delete();
 	}

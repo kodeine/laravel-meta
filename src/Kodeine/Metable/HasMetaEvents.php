@@ -51,6 +51,7 @@ trait HasMetaEvents
 		$this->observables = array_merge( $this->observables, [
 			'metaSaving',
 			'metaUpdating',
+			'metaDeleting',
 		] );
 	}
 	
@@ -60,5 +61,9 @@ trait HasMetaEvents
 	
 	public static function metaUpdating($callback) {
 		static::registerModelEvent( 'metaUpdating', $callback );
+	}
+	
+	public static function metaDeleting($callback) {
+		static::registerModelEvent( 'metaDeleting', $callback );
 	}
 }
