@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class MetableTest extends TestCase
 {
-	protected function setUp(): void {
+	public static function setUpBeforeClass(): void {
 		$capsule = new Capsule;
 		$capsule->addConnection( [
 			'driver' => 'sqlite',
