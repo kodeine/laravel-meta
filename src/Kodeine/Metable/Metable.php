@@ -131,6 +131,7 @@ trait Metable
 					return true;
 				}
 			}
+			return false;
 		}
 		if ( is_array( $metas[0] ) ) {
 			$metas = $metas[0];
