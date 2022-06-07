@@ -2,19 +2,19 @@
 
 namespace Kodeine\Metable\Tests\Observers;
 
-use Kodeine\Metable\Tests\Models\Event;
+use Kodeine\Metable\Tests\Models\EventTest;
 
 class EventObserver
 {
-	public function metaSaving(Event $model, $meta) {
+	public function metaSaving(EventTest $model, $meta) {
 		return $this->genericObserver( $model, $meta, __FUNCTION__ );
 	}
 	
-	public function metaUpdating(Event $model, $meta) {
+	public function metaUpdating(EventTest $model, $meta) {
 		return $this->genericObserver( $model, $meta, __FUNCTION__ );
 	}
 	
-	protected function genericObserver(Event $model, $meta, $eventName) {
+	protected function genericObserver(EventTest $model, $meta, $eventName) {
 		if ( ! isset( $model->observersChanges[$eventName] ) ) {
 			$model->observersChanges[$eventName] = [];
 		}

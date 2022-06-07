@@ -6,10 +6,10 @@ use Kodeine\Metable\Metable;
 use Illuminate\Events\Dispatcher;
 use Kodeine\Metable\HasMetaEvents;
 use Illuminate\Database\Eloquent\Model;
-use Kodeine\Metable\Tests\Events\MetaSaving;
-use Kodeine\Metable\Tests\Events\MetaUpdating;
+use Kodeine\Metable\Tests\Events\MetaSavingTestEvent;
+use Kodeine\Metable\Tests\Events\MetaUpdatingTestEvent;
 
-class Event extends Model
+class EventTest extends Model
 {
 	use Metable, HasMetaEvents;
 	
@@ -21,15 +21,15 @@ class Event extends Model
 	public $classListenersShouldReturnFalse = false;
 	
 	protected $dispatchesEvents = [
-		'metaSaving' => MetaSaving::class,
-		'metaUpdating' => MetaUpdating::class,
+		'metaSaving' => MetaSavingTestEvent::class,
+		'metaUpdating' => MetaUpdatingTestEvent::class,
 	];
 	
 	public static function boot() {
 		static::setEventDispatcher( new Dispatcher() );
 		parent::boot();
 		
-		$listener = function (Event $model, $meta, $eventName) {
+		$listener = function (EventTest $model, $meta, $eventName) {
 			if ( ! isset( $model->listenersChanges[$eventName] ) ) {
 				$model->listenersChanges[$eventName] = [];
 			}
@@ -39,11 +39,11 @@ class Event extends Model
 			}
 		};
 		
-		static::metaSaving( function (Event $model, $meta) use ($listener) {
+		static::metaSaving( function (EventTest $model, $meta) use ($listener) {
 			return $listener( $model, $meta, 'metaSaving' );
 		} );
 		
-		static::metaUpdating( function (Event $model, $meta) use ($listener) {
+		static::metaUpdating( function (EventTest $model, $meta) use ($listener) {
 			return $listener( $model, $meta, 'metaUpdating' );
 		} );
 	}

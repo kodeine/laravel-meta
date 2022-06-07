@@ -3,7 +3,7 @@
 namespace Kodeine\Metable\Tests\Events;
 
 
-class MetaSaving extends BaseEvent
+class MetaUpdatingTestEvent extends BaseEventTest
 {
 	
 }

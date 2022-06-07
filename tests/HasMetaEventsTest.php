@@ -5,13 +5,13 @@
 namespace Kodeine\Metable\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Kodeine\Metable\Tests\Models\Event;
-use Kodeine\Metable\Tests\Events\MetaSaving;
-use Kodeine\Metable\Tests\Events\MetaUpdating;
+use Kodeine\Metable\Tests\Models\EventTest;
+use Kodeine\Metable\Tests\Events\MetaSavingTestEvent;
+use Kodeine\Metable\Tests\Events\MetaUpdatingTestEvent;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Kodeine\Metable\Tests\Observers\EventObserver;
-use Kodeine\Metable\Tests\Listeners\HandleMetaSaving;
-use Kodeine\Metable\Tests\Listeners\HandleMetaUpdating;
+use Kodeine\Metable\Tests\Listeners\HandleMetaSavingTestEvent;
+use Kodeine\Metable\Tests\Listeners\HandleMetaUpdatingTestEvent;
 
 class HasMetaEventsTest extends TestCase
 {
@@ -28,15 +28,15 @@ class HasMetaEventsTest extends TestCase
 		$capsule->setAsGlobal();
 		$capsule->bootEloquent();
 		Capsule::schema()->enableForeignKeyConstraints();
-		Capsule::schema()->create( 'events', function ($table) {
+		Capsule::schema()->create( 'event_tests', function ($table) {
 			$table->id();
 			$table->string( 'name' )->default( 'john' );
 			$table->timestamps();
 		} );
-		Capsule::schema()->create( 'events_meta', function ($table) {
+		Capsule::schema()->create( 'event_tests_meta', function ($table) {
 			$table->id();
-			$table->integer( 'event_id' )->unsigned();
-			$table->foreign( 'event_id' )->references( 'id' )->on( 'events' )->onDelete( 'cascade' );
+			$table->integer( 'event_test_id' )->unsigned();
+			$table->foreign( 'event_test_id' )->references( 'id' )->on( 'event_tests' )->onDelete( 'cascade' );
 			$table->string( 'type' )->default( 'null' );
 			$table->string( 'key' )->index();
 			$table->text( 'value' )->nullable();
@@ -44,27 +44,29 @@ class HasMetaEventsTest extends TestCase
 			$table->timestamps();
 		} );
 		
-		$event = new Event;
-		Event::observe( EventObserver::class );
+		// create new model so that it's boot method registers the event dispatcher
+		/** @noinspection PhpUnusedLocalVariableInspection */
+		$event = new EventTest;
+		EventTest::observe( EventObserver::class );
 		
 		$listen = [
-			MetaSaving::class => [
-				HandleMetaSaving::class,
+			MetaSavingTestEvent::class => [
+				HandleMetaSavingTestEvent::class,
 			],
-			MetaUpdating::class => [
-				HandleMetaUpdating::class,
+			MetaUpdatingTestEvent::class => [
+				HandleMetaUpdatingTestEvent::class,
 			],
 		];
 		foreach ($listen as $event => $listeners) {
 			foreach ($listeners as $listener) {
-				Event::getEventDispatcher()->listen( $event, $listener );
+				EventTest::getEventDispatcher()->listen( $event, $listener );
 			}
 		}
 	}
 	
 	public function testMetaSavingEvent() {
 		$eventName = 'metaSaving';
-		$event = new Event;
+		$event = new EventTest;
 		
 		$this->assertContains( $eventName, $event->getObservableEvents(), "$eventName event should be observable" );
 		
@@ -86,7 +88,7 @@ class HasMetaEventsTest extends TestCase
 		
 		$event->save();
 		
-		$metaData = Capsule::table( 'events_meta' )->where( $event->getMetaKeyName(), $event->getKey() )->where( 'key', 'bar' );
+		$metaData = Capsule::table( $event->getMetaTable() )->where( $event->getMetaKeyName(), $event->getKey() )->where( 'key', 'bar' );
 		
 		$this->assertContains( 'bar', $event->listenersChanges[$eventName] ?? [], "$eventName event should be fired" );
 		$this->assertTrue( $event->isMetaDirty( 'bar' ), "Meta should be dirty" );
@@ -115,7 +117,7 @@ class HasMetaEventsTest extends TestCase
 	
 	public function testMetaUpdatingEvent() {
 		$eventName = 'metaUpdating';
-		$event = new Event;
+		$event = new EventTest;
 		
 		$this->assertContains( $eventName, $event->getObservableEvents(), "$eventName event should be observable" );
 		

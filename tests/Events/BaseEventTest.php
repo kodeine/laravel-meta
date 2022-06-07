@@ -2,17 +2,17 @@
 
 namespace Kodeine\Metable\Tests\Events;
 
-use Kodeine\Metable\Tests\Models\Event;
+use Kodeine\Metable\Tests\Models\EventTest;
 
-class BaseEvent
+class BaseEventTest
 {
 	/**
-	 * @var Event
+	 * @var EventTest
 	 */
 	public $model;
 	public $meta;
 	
-	public function __construct(Event $model, $meta) {
+	public function __construct(EventTest $model, $meta) {
 		$this->model = $model;
 		$this->meta = $meta;
 	}

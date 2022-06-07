@@ -3,12 +3,13 @@
 namespace Kodeine\Metable\Tests\Listeners;
 
 use Illuminate\Support\Str;
-use Kodeine\Metable\Tests\Events\BaseEvent;
+use Kodeine\Metable\Tests\Events\BaseEventTest;
 
-class BaseListener
+class BaseListenerTest
 {
-	public function handle(BaseEvent $event) {
-		$eventName = Str::camel( class_basename( $event ) );
+	public function handle(BaseEventTest $event) {
+		$eventName = Str::before( class_basename( $event ), 'TestEvent' );
+		$eventName = Str::camel( $eventName );
 		if ( ! isset( $event->model->classListenersChanges[$eventName] ) ) {
 			$event->model->classListenersChanges[$eventName] = [];
 		}
