@@ -56,6 +56,7 @@ trait HasMetaEvents
 			'metaUpdating',
 			'metaUpdated',
 			'metaDeleting',
+			'metaDeleted',
 		] );
 	}
 	
@@ -85,5 +86,9 @@ trait HasMetaEvents
 	
 	public static function metaDeleting($callback) {
 		static::registerModelEvent( 'metaDeleting', $callback );
+	}
+	
+	public static function metaDeleted($callback) {
+		static::registerModelEvent( 'metaDeleted', $callback );
 	}
 }

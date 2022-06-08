@@ -308,6 +308,7 @@ trait Metable
 				}
 				$meta->delete();
 				unset( $this->getMetaData()[$meta->key] );
+				$this->fireMetaEvent( 'deleted', $meta->key, false );
 				continue;
 			}
 			

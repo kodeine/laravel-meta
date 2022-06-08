@@ -10,6 +10,7 @@ use Kodeine\Metable\Tests\Events\MetaSavedTestEvent;
 use Kodeine\Metable\Tests\Events\MetaSavingTestEvent;
 use Kodeine\Metable\Tests\Events\MetaCreatedTestEvent;
 use Kodeine\Metable\Tests\Events\MetaUpdatedTestEvent;
+use Kodeine\Metable\Tests\Events\MetaDeletedTestEvent;
 use Kodeine\Metable\Tests\Events\MetaUpdatingTestEvent;
 use Kodeine\Metable\Tests\Events\MetaDeletingTestEvent;
 use Kodeine\Metable\Tests\Events\MetaCreatingTestEvent;
@@ -33,6 +34,7 @@ class EventTest extends Model
 		'metaUpdating' => MetaUpdatingTestEvent::class,
 		'metaUpdated' => MetaUpdatedTestEvent::class,
 		'metaDeleting' => MetaDeletingTestEvent::class,
+		'metaDeleted' => MetaDeletedTestEvent::class,
 	];
 	
 	public static function boot() {
@@ -75,6 +77,10 @@ class EventTest extends Model
 		
 		static::metaDeleting( function (EventTest $model, $meta) use ($listener) {
 			return $listener( $model, $meta, 'metaDeleting' );
+		} );
+		
+		static::metaDeleted( function (EventTest $model, $meta) use ($listener) {
+			return $listener( $model, $meta, 'metaDeleted' );
 		} );
 	}
 }
