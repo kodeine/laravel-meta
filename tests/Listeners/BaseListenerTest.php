@@ -14,7 +14,7 @@ class BaseListenerTest
 			$event->model->classListenersChanges[$eventName] = [];
 		}
 		$event->model->classListenersChanges[$eventName][] = $event->meta;
-		if ( $event->model->classListenersShouldReturnFalse ) {
+		if ( $event->model->classListenersShouldReturnFalse[$eventName] ?? false ) {
 			return false;
 		}
 	}

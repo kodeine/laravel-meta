@@ -87,7 +87,7 @@ class HasMetaEventsTest extends TestCase
 		$this->assertFalse( $event->isMetaDirty( 'bar' ), "Meta should not be dirty" );
 		
 		$event->bar = 'bar';
-		$event->listenerShouldReturnFalse = true;
+		$event->listenerShouldReturnFalse[$eventName] = true;
 		
 		$this->assertTrue( $event->isMetaDirty( 'bar' ), "Meta should be dirty" );
 		
@@ -99,20 +99,20 @@ class HasMetaEventsTest extends TestCase
 		$this->assertTrue( $event->isMetaDirty( 'bar' ), "Meta should be dirty" );
 		$this->assertNull( $metaData->first(), "Meta should not be saved" );
 		
-		$event->listenerShouldReturnFalse = false;
-		$event->observersShouldReturnFalse = true;
+		$event->listenerShouldReturnFalse[$eventName] = false;
+		$event->observersShouldReturnFalse[$eventName] = true;
 		$event->foo = 'baz';
 		$event->save();
 		
 		$this->assertTrue( $event->isMetaDirty( 'bar' ), "Meta should be dirty" );
 		
-		$event->observersShouldReturnFalse = false;
-		$event->classListenersShouldReturnFalse = true;
+		$event->observersShouldReturnFalse[$eventName] = false;
+		$event->classListenersShouldReturnFalse[$eventName] = true;
 		$event->save();
 		
 		$this->assertTrue( $event->isMetaDirty( 'bar' ), "Meta should be dirty" );
 		
-		$event->classListenersShouldReturnFalse = false;
+		$event->classListenersShouldReturnFalse[$eventName] = false;
 		$event->save();
 		
 		$this->assertFalse( $event->isMetaDirty( 'bar' ), "Meta should not be dirty" );
@@ -182,7 +182,7 @@ class HasMetaEventsTest extends TestCase
 		
 		$event->bar = 'bar';
 		$event->save();
-		$event->listenerShouldReturnFalse = true;
+		$event->listenerShouldReturnFalse[$eventName] = true;
 		$event->unsetMeta( 'bar' );
 		$event->save();
 		
@@ -193,23 +193,23 @@ class HasMetaEventsTest extends TestCase
 		$this->assertFalse( $event->hasMeta( 'bar' ), "Meta should not exist because it is marked for deletion" );
 		$this->assertNotNull( $metaData->first(), "Meta should not be removed" );
 		
-		$event->listenerShouldReturnFalse = false;
-		$event->observersShouldReturnFalse = true;
+		$event->listenerShouldReturnFalse[$eventName] = false;
+		$event->observersShouldReturnFalse[$eventName] = true;
 		$event->save();
 		
 		$this->assertTrue( $event->getMetaData()->has( 'bar' ), "Meta should exist" );
 		$this->assertFalse( $event->hasMeta( 'bar' ), "Meta should not exist because it is marked for deletion" );
 		$this->assertNotNull( $metaData->first(), "Meta should not be removed" );
 		
-		$event->observersShouldReturnFalse = false;
-		$event->classListenersShouldReturnFalse = true;
+		$event->observersShouldReturnFalse[$eventName] = false;
+		$event->classListenersShouldReturnFalse[$eventName] = true;
 		$event->save();
 		
 		$this->assertTrue( $event->getMetaData()->has( 'bar' ), "Meta should exist" );
 		$this->assertFalse( $event->hasMeta( 'bar' ), "Meta should not exist because it is marked for deletion" );
 		$this->assertNotNull( $metaData->first(), "Meta should not be removed" );
 		
-		$event->classListenersShouldReturnFalse = false;
+		$event->classListenersShouldReturnFalse[$eventName] = false;
 		$event->save();
 		
 		$this->assertFalse( $event->getMetaData()->has( 'bar' ), "Meta should not exist" );

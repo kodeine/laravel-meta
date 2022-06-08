@@ -17,9 +17,9 @@ class EventTest extends Model
 	public $listenersChanges = [];
 	public $observersChanges = [];
 	public $classListenersChanges = [];
-	public $listenerShouldReturnFalse = false;
-	public $observersShouldReturnFalse = false;
-	public $classListenersShouldReturnFalse = false;
+	public $listenerShouldReturnFalse = [];
+	public $observersShouldReturnFalse = [];
+	public $classListenersShouldReturnFalse = [];
 	
 	protected $dispatchesEvents = [
 		'metaSaving' => MetaSavingTestEvent::class,
@@ -36,7 +36,7 @@ class EventTest extends Model
 				$model->listenersChanges[$eventName] = [];
 			}
 			$model->listenersChanges[$eventName][] = $meta;
-			if ( $model->listenerShouldReturnFalse ) {
+			if ( $model->listenerShouldReturnFalse[$eventName] ?? false ) {
 				return false;
 			}
 		};

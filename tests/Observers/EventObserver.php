@@ -23,7 +23,7 @@ class EventObserver
 			$model->observersChanges[$eventName] = [];
 		}
 		$model->observersChanges[$eventName][] = $meta;
-		if ( $model->observersShouldReturnFalse ) {
+		if ( $model->observersShouldReturnFalse[$eventName] ?? false ) {
 			return false;
 		}
 	}
