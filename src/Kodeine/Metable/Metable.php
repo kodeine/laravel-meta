@@ -320,6 +320,11 @@ trait Metable
 						continue;
 					}
 				}
+				else {
+					if ( $this->fireMetaEvent( 'creating', $meta->key ) === false ) {
+						continue;
+					}
+				}
 				// set meta and model relation id's into meta table.
 				$meta->setAttribute( $this->getMetaKeyName(), $this->getKey() );
 				$meta->save();

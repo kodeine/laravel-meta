@@ -6,6 +6,10 @@ use Kodeine\Metable\Tests\Models\EventTest;
 
 class EventObserver
 {
+	public function metaCreating(EventTest $model, $meta) {
+		return $this->genericObserver( $model, $meta, __FUNCTION__ );
+	}
+	
 	public function metaSaving(EventTest $model, $meta) {
 		return $this->genericObserver( $model, $meta, __FUNCTION__ );
 	}

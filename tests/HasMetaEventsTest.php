@@ -11,9 +11,11 @@ use Kodeine\Metable\Tests\Events\MetaUpdatingTestEvent;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Kodeine\Metable\Tests\Observers\EventObserver;
 use Kodeine\Metable\Tests\Events\MetaDeletingTestEvent;
+use Kodeine\Metable\Tests\Events\MetaCreatingTestEvent;
 use Kodeine\Metable\Tests\Listeners\HandleMetaSavingTestEvent;
 use Kodeine\Metable\Tests\Listeners\HandleMetaUpdatingTestEvent;
 use Kodeine\Metable\Tests\Listeners\HandleMetaDeletingTestEvent;
+use Kodeine\Metable\Tests\Listeners\HandleMetaCreatingTestEvent;
 
 class HasMetaEventsTest extends TestCase
 {
@@ -52,6 +54,9 @@ class HasMetaEventsTest extends TestCase
 		EventTest::observe( EventObserver::class );
 		
 		$listen = [
+			MetaCreatingTestEvent::class => [
+				HandleMetaCreatingTestEvent::class,
+			],
 			MetaSavingTestEvent::class => [
 				HandleMetaSavingTestEvent::class,
 			],
@@ -67,6 +72,57 @@ class HasMetaEventsTest extends TestCase
 				EventTest::getEventDispatcher()->listen( $event, $listener );
 			}
 		}
+	}
+	
+	public function testMetaCreatingEvent() {
+		$eventName = 'metaCreating';
+		$event = new EventTest;
+		
+		$this->assertContains( $eventName, $event->getObservableEvents(), "$eventName event should be observable" );
+		
+		$event->foo = 'bar';
+		$event->save();
+		
+		$this->assertContains( 'foo', $event->listenersChanges[$eventName] ?? [], "$eventName event should be fired" );
+		$this->assertCount( 1, $event->listenersChanges[$eventName] ?? [], "$eventName event should be fired only once" );
+		$this->assertContains( 'foo', $event->observersChanges[$eventName] ?? [], "$eventName event should be fired by observer" );
+		$this->assertCount( 1, $event->observersChanges[$eventName] ?? [], "$eventName event should be fired by observer only once" );
+		$this->assertContains( 'foo', $event->classListenersChanges[$eventName] ?? [], "$eventName event should be fired by class listener" );
+		$this->assertCount( 1, $event->classListenersChanges[$eventName] ?? [], "$eventName event should be fired by class listener only once" );
+		$this->assertFalse( $event->isMetaDirty( 'bar' ), "Meta should not be dirty" );
+		
+		$event->bar = 'bar';
+		$event->listenerShouldReturnFalse[$eventName] = true;
+		
+		$this->assertTrue( $event->isMetaDirty( 'bar' ), "Meta should be dirty" );
+		
+		$event->save();
+		
+		$metaData = Capsule::table( $event->getMetaTable() )->where( $event->getMetaKeyName(), $event->getKey() )->where( 'key', 'bar' );
+		
+		$this->assertContains( 'bar', $event->listenersChanges[$eventName] ?? [], "$eventName event should be fired" );
+		$this->assertTrue( $event->isMetaDirty( 'bar' ), "Meta should be dirty" );
+		$this->assertNull( $metaData->first(), "Meta should not be saved" );
+		
+		$event->listenerShouldReturnFalse[$eventName] = false;
+		$event->observersShouldReturnFalse[$eventName] = true;
+		$event->foo = 'baz';
+		$event->save();
+		
+		$this->assertTrue( $event->isMetaDirty( 'bar' ), "Meta should be dirty" );
+		
+		$event->observersShouldReturnFalse[$eventName] = false;
+		$event->classListenersShouldReturnFalse[$eventName] = true;
+		$event->save();
+		
+		$this->assertTrue( $event->isMetaDirty( 'bar' ), "Meta should be dirty" );
+		
+		$event->classListenersShouldReturnFalse[$eventName] = false;
+		$event->save();
+		
+		$this->assertFalse( $event->isMetaDirty( 'bar' ), "Meta should not be dirty" );
+		
+		$event->delete();
 	}
 	
 	public function testMetaSavingEvent() {
