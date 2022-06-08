@@ -145,8 +145,36 @@ class HasMetaEventsTest extends TestCase
 		$this->assertFalse( $event->isMetaDirty( 'bar' ), "Meta should not be dirty" );
 		
 		$event->bar = 'bar';
+		$event->saveMeta();
+		$event->bar = 'foobar';
+		$event->listenerShouldReturnFalse[$eventName] = true;
 		
 		$this->assertTrue( $event->isMetaDirty( 'bar' ), "Meta should be dirty" );
+		
+		$event->save();
+		
+		$metaData = Capsule::table( $event->getMetaTable() )->where( $event->getMetaKeyName(), $event->getKey() )->where( 'key', 'bar' );
+		
+		$this->assertContains( 'bar', $event->listenersChanges[$eventName] ?? [], "$eventName event should be fired" );
+		$this->assertTrue( $event->isMetaDirty( 'bar' ), "Meta should be dirty" );
+		$this->assertEquals( 'bar', is_null( $meta = $metaData->first() ) ? null : $meta->value, "Meta should not be changed" );
+		
+		$event->listenerShouldReturnFalse[$eventName] = false;
+		$event->observersShouldReturnFalse[$eventName] = true;
+		$event->save();
+		
+		$this->assertTrue( $event->isMetaDirty( 'bar' ), "Meta should be dirty" );
+		
+		$event->observersShouldReturnFalse[$eventName] = false;
+		$event->classListenersShouldReturnFalse[$eventName] = true;
+		$event->save();
+		
+		$this->assertTrue( $event->isMetaDirty( 'bar' ), "Meta should be dirty" );
+		
+		$event->classListenersShouldReturnFalse[$eventName] = false;
+		$event->save();
+		
+		$this->assertFalse( $event->isMetaDirty( 'bar' ), "Meta should not be dirty" );
 		
 		$event->delete();
 	}
