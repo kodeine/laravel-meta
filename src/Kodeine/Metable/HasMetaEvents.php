@@ -58,6 +58,7 @@ trait HasMetaEvents
 			'metaDeleting',
 			'metaDeleted',
 		] );
+		$this->observables = array_unique( $this->observables );
 	}
 	
 	public static function metaCreating($callback) {
