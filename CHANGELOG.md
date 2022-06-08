@@ -1,5 +1,12 @@
 # Release Notes
 
+## v2.1.0
+
+### Added
+
+* Added [events](README.md#events) for metas.
+* Added `isMetaDirty` method.
+
 ## v2.0.0
 
 ### Added
