@@ -52,6 +52,7 @@ trait HasMetaEvents
 			'metaCreating',
 			'metaCreated',
 			'metaSaving',
+			'metaSaved',
 			'metaUpdating',
 			'metaUpdated',
 			'metaDeleting',
@@ -68,6 +69,10 @@ trait HasMetaEvents
 	
 	public static function metaSaving($callback) {
 		static::registerModelEvent( 'metaSaving', $callback );
+	}
+	
+	public static function metaSaved($callback) {
+		static::registerModelEvent( 'metaSaved', $callback );
 	}
 	
 	public static function metaUpdating($callback) {

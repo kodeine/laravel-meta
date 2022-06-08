@@ -331,6 +331,7 @@ trait Metable
 				$meta->setAttribute( $this->getMetaKeyName(), $this->getKey() );
 				if ( $meta->save() ) {
 					$this->fireMetaEvent( $nextEvent, $meta->key, false );
+					$this->fireMetaEvent( 'saved', $meta->key, false );
 				}
 			}
 		}

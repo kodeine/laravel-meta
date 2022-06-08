@@ -6,6 +6,7 @@ use Kodeine\Metable\Metable;
 use Illuminate\Events\Dispatcher;
 use Kodeine\Metable\HasMetaEvents;
 use Illuminate\Database\Eloquent\Model;
+use Kodeine\Metable\Tests\Events\MetaSavedTestEvent;
 use Kodeine\Metable\Tests\Events\MetaSavingTestEvent;
 use Kodeine\Metable\Tests\Events\MetaCreatedTestEvent;
 use Kodeine\Metable\Tests\Events\MetaUpdatedTestEvent;
@@ -28,6 +29,7 @@ class EventTest extends Model
 		'metaCreating' => MetaCreatingTestEvent::class,
 		'metaCreated' => MetaCreatedTestEvent::class,
 		'metaSaving' => MetaSavingTestEvent::class,
+		'metaSaved' => MetaSavedTestEvent::class,
 		'metaUpdating' => MetaUpdatingTestEvent::class,
 		'metaUpdated' => MetaUpdatedTestEvent::class,
 		'metaDeleting' => MetaDeletingTestEvent::class,
@@ -57,6 +59,10 @@ class EventTest extends Model
 		
 		static::metaSaving( function (EventTest $model, $meta) use ($listener) {
 			return $listener( $model, $meta, 'metaSaving' );
+		} );
+		
+		static::metaSaved( function (EventTest $model, $meta) use ($listener) {
+			return $listener( $model, $meta, 'metaSaved' );
 		} );
 		
 		static::metaUpdating( function (EventTest $model, $meta) use ($listener) {
