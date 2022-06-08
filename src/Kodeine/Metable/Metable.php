@@ -319,15 +319,19 @@ trait Metable
 					if ( $this->fireMetaEvent( 'updating', $meta->key ) === false ) {
 						continue;
 					}
+					$nextEvent = 'updated';
 				}
 				else {
 					if ( $this->fireMetaEvent( 'creating', $meta->key ) === false ) {
 						continue;
 					}
+					$nextEvent = 'created';
 				}
 				// set meta and model relation id's into meta table.
 				$meta->setAttribute( $this->getMetaKeyName(), $this->getKey() );
-				$meta->save();
+				if ( $meta->save() ) {
+					$this->fireMetaEvent( $nextEvent, $meta->key, false );
+				}
 			}
 		}
 	}

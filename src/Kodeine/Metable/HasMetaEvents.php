@@ -50,8 +50,10 @@ trait HasMetaEvents
 	protected function initializeHasMetaEvents() {
 		$this->observables = array_merge( $this->observables, [
 			'metaCreating',
+			'metaCreated',
 			'metaSaving',
 			'metaUpdating',
+			'metaUpdated',
 			'metaDeleting',
 		] );
 	}
@@ -60,12 +62,20 @@ trait HasMetaEvents
 		static::registerModelEvent( 'metaCreating', $callback );
 	}
 	
+	public static function metaCreated($callback) {
+		static::registerModelEvent( 'metaCreated', $callback );
+	}
+	
 	public static function metaSaving($callback) {
 		static::registerModelEvent( 'metaSaving', $callback );
 	}
 	
 	public static function metaUpdating($callback) {
 		static::registerModelEvent( 'metaUpdating', $callback );
+	}
+	
+	public static function metaUpdated($callback) {
+		static::registerModelEvent( 'metaUpdated', $callback );
 	}
 	
 	public static function metaDeleting($callback) {

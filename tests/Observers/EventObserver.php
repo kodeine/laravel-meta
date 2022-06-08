@@ -10,11 +10,19 @@ class EventObserver
 		return $this->genericObserver( $model, $meta, __FUNCTION__ );
 	}
 	
+	public function metaCreated(EventTest $model, $meta) {
+		return $this->genericObserver( $model, $meta, __FUNCTION__ );
+	}
+	
 	public function metaSaving(EventTest $model, $meta) {
 		return $this->genericObserver( $model, $meta, __FUNCTION__ );
 	}
 	
 	public function metaUpdating(EventTest $model, $meta) {
+		return $this->genericObserver( $model, $meta, __FUNCTION__ );
+	}
+	
+	public function metaUpdated(EventTest $model, $meta) {
 		return $this->genericObserver( $model, $meta, __FUNCTION__ );
 	}
 	
