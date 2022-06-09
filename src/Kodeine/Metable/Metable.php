@@ -119,6 +119,41 @@ trait Metable
 	}
 	
 	/**
+	 * Determine if the meta or any of the given metas have been modified.
+	 *
+	 * @param array|string|null $metas
+	 * @return bool
+	 */
+	public function isMetaDirty(...$metas): bool {
+		if ( empty( $metas ) ) {
+			foreach ($this->getMetaData() as $meta) {
+				if ( $meta->isDirty() ) {
+					return true;
+				}
+			}
+			return false;
+		}
+		if ( is_array( $metas[0] ) ) {
+			$metas = $metas[0];
+		}
+		elseif ( is_string( $metas[0] ) && preg_match( '/[,|]/is', $metas[0] ) ) {
+			$metas = preg_split( '/ ?[,|] ?/', $metas[0] );
+		}
+		
+		foreach ($metas as $meta) {
+			if ( $this->getMetaData()->has( $meta ) ) {
+				if ( $this->getMetaData()[$meta]->isDirty() ) {
+					return true;
+				}
+				if ( $this->getMetaData()[$meta]->isMarkedForDeletion() ) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	/**
 	 * Unset Meta Data functions
 	 * -------------------------.
 	 */
@@ -269,17 +304,48 @@ trait Metable
 			$meta->setTable( $this->getMetaTable() );
 			
 			if ( $meta->isMarkedForDeletion() ) {
+				if ( $meta->exists ) {
+					if ( $this->fireMetaEvent( 'deleting', $meta->key ) === false ) {
+						continue;
+					}
+				}
 				$meta->delete();
 				unset( $this->getMetaData()[$meta->key] );
+				$this->fireMetaEvent( 'deleted', $meta->key, false );
 				continue;
 			}
 			
 			if ( $meta->isDirty() ) {
+				if ( $this->fireMetaEvent( 'saving', $meta->key ) === false ) {
+					continue;
+				}
+				if ( $meta->exists ) {
+					if ( $this->fireMetaEvent( 'updating', $meta->key ) === false ) {
+						continue;
+					}
+					$nextEvent = 'updated';
+				}
+				else {
+					if ( $this->fireMetaEvent( 'creating', $meta->key ) === false ) {
+						continue;
+					}
+					$nextEvent = 'created';
+				}
 				// set meta and model relation id's into meta table.
 				$meta->setAttribute( $this->getMetaKeyName(), $this->getKey() );
-				$meta->save();
+				if ( $meta->save() ) {
+					$this->fireMetaEvent( $nextEvent, $meta->key, false );
+					$this->fireMetaEvent( 'saved', $meta->key, false );
+				}
 			}
 		}
+	}
+	
+	protected function fireMetaEvent($event, $metaName, bool $halt = true) {
+		if ( method_exists( $this, '__fireMetaEvent' ) ) {
+			return $this->__fireMetaEvent( 'meta' . Str::ucfirst( $event ), $metaName, $halt );
+		}
+		return true;
 	}
 	
 	public function getMetaData() {

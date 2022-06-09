@@ -66,6 +66,8 @@ Laravel meta 2 has some backward incompatible changes that listed below:
 
 #### Migration Table Schema
 
+Each model needs its own meta table.
+
 This is an example migration. you need change parts of it.
 
 In this example we assume you have a model named `Post`.
@@ -344,7 +346,7 @@ $post->getMeta(['content', 'views'],'none');// result if the metas are missing: 
 $post->getMeta(['content', 'views']);// result if the metas are missing: ['content'=>null,'views'=>null]
 ```
 
-#### Disable fluent access
+#### Disable Fluent Access
 
 If you don't want to access metas in fluent way, you can disable it by adding following property to your model:
 
@@ -407,4 +409,75 @@ You can also use it on eloquent relations.
 ```php
 /* Post model */
 public $hideMeta = true; // Do not add metas to array
+```
+
+## Events
+
+Laravel meta dispatches several events, allowing you to hook into the following events: `metaCreating`, `metaCreated`, `metaSaving`, `metaSaved`, `metaUpdating`, `metaUpdated`, `metaDeleting` and `metaDeleted`. Listeners should expect two parameters, first an instance of the model and second, name of the meta that event occurred for it. To enable events you need to add `HasMetaEvents` trait to your model:
+
+```php
+use Kodeine\Metable\Metable;
+use Kodeine\Metable\HasMetaEvents;
+use Illuminate\Database\Eloquent\Model;
+
+class User extends Model
+{
+    use Metable,HasMetaEvents;
+}
+```
+
+After that, you can listen for events the [same way](https://laravel.com/docs/master/eloquent#events) you do for models.
+
+> If you `return false;` in listener of any event ending with `ing`, that operation will be aborted.
+
+There are 3 ways to listen for events:
+
+#### 1. By Defining `$dispatchesEvents` Property
+
+```php
+use App\Events\UserMetaSaved;
+use Kodeine\Metable\Metable;
+use Kodeine\Metable\HasMetaEvents;
+use Illuminate\Database\Eloquent\Model;
+
+class User extends Model
+{
+    use Metable,HasMetaEvents;
+
+    protected $dispatchesEvents = [
+        'metaSaved' => UserMetaSaved::class,
+    ];
+}
+```
+
+#### 2. [Using Closures](https://laravel.com/docs/master/eloquent#events-using-closures)
+
+```php
+use Kodeine\Metable\Metable;
+use Kodeine\Metable\HasMetaEvents;
+use Illuminate\Database\Eloquent\Model;
+
+class User extends Model
+{
+    use Metable,HasMetaEvents;
+
+    protected static function booted()
+    {
+        static::metaCreated(function ($user, $meta) {
+            //
+        });
+    }
+}
+```
+
+#### 3. [Observers](https://laravel.com/docs/master/eloquent#observers)
+
+```php
+class UserObserver
+{
+    public function metaCreated(User $user,$meta)
+    {
+        //
+    }
+}
 ```

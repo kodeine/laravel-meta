@@ -7,13 +7,13 @@ namespace Kodeine\Metable\Tests;
 use stdClass;
 use DateTime;
 use PHPUnit\Framework\TestCase;
-use Kodeine\Metable\Tests\Models\User;
+use Kodeine\Metable\Tests\Models\UserTest;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class MetableTest extends TestCase
 {
-	protected function setUp(): void {
+	public static function setUpBeforeClass(): void {
 		$capsule = new Capsule;
 		$capsule->addConnection( [
 			'driver' => 'sqlite',
@@ -26,41 +26,40 @@ class MetableTest extends TestCase
 		$capsule->setAsGlobal();
 		$capsule->bootEloquent();
 		Capsule::schema()->enableForeignKeyConstraints();
-		Capsule::schema()->create( 'users', function ($table) {
+		Capsule::schema()->create( 'user_tests', function ($table) {
 			$table->id();
 			$table->string( 'name' )->default( 'john' );
 			$table->string( 'email' )->default( 'john@doe.com' );
 			$table->string( 'password' )->nullable();
-			$table->integer( 'user_id' )->unsigned()->nullable();
-			$table->foreign( 'user_id' )->references( 'id' )->on( 'users' );
+			$table->integer( 'user_test_id' )->unsigned()->nullable();
+			$table->foreign( 'user_test_id' )->references( 'id' )->on( 'user_tests' );
 			$table->timestamps();
 		} );
-		Capsule::schema()->create( 'users_meta', function ($table) {
+		Capsule::schema()->create( 'user_tests_meta', function ($table) {
 			$table->id();
-			$table->integer( 'user_id' )->unsigned();
-			$table->foreign( 'user_id' )->references( 'id' )->on( 'users' )->onDelete( 'cascade' );
+			$table->integer( 'user_test_id' )->unsigned();
+			$table->foreign( 'user_test_id' )->references( 'id' )->on( 'user_tests' )->onDelete( 'cascade' );
 			$table->string( 'type' )->default( 'null' );
 			$table->string( 'key' )->index();
 			$table->text( 'value' )->nullable();
 			
 			$table->timestamps();
 		} );
-		/*Capsule::schema()->table( 'users_meta', function ($table) {
-			$table->foreign( 'user_id' )->references( 'id' )->on( 'users' )->onDelete( 'cascade' );
-		} );*/
 	}
 	
 	public function testFluentMeta() {
-		$user = new User;
+		$user = new UserTest;
 		
 		$this->assertNull( $user->foo, 'Meta should be null by default' );
+		$this->assertFalse( $user->isMetaDirty( 'foo' ), 'Meta should not be dirty before assigning value.' );
 		
 		$user->foo = 'bar';
 		
 		/** @noinspection PhpConditionAlreadyCheckedInspection */
 		$this->assertTrue( isset( $user->foo ), 'Fluent meta should be set before save.' );
 		$this->assertEquals( 'bar', $user->foo, 'Fluent setter not working before save.' );
-		$this->assertEquals( 0, Capsule::table( 'users_meta' )->count(), 'Fluent setter should not save to database before save.' );
+		$this->assertEquals( 0, Capsule::table( $user->getMetaTable() )->count(), 'Fluent setter should not save to database before save.' );
+		$this->assertTrue( $user->isMetaDirty( 'foo' ), 'Meta should be dirty before save.' );
 		
 		$this->assertNull( $user->dummy, 'Dummy relation should be null by default' );
 		$this->dummy = 'dummy';
@@ -69,11 +68,12 @@ class MetableTest extends TestCase
 		
 		$this->assertNull( $user->dummy, 'Dummy relation should be null after setting meta named dummy' );
 		
-		$metaData = Capsule::table( 'users_meta' )->where( $user->getMetaKeyName(), $user->getKey() )->where( 'key', 'foo' );
+		$metaData = Capsule::table( $user->getMetaTable() )->where( $user->getMetaKeyName(), $user->getKey() )->where( 'key', 'foo' );
 		
 		$this->assertTrue( isset( $user->foo ), 'Fluent meta should be set.' );
 		$this->assertEquals( 'bar', $user->foo, 'Fluent setter not working.' );
 		$this->assertEquals( 'bar', is_null( $meta = $metaData->first() ) ? null : $meta->value, 'Fluent setter did not save meta to database.' );
+		$this->assertFalse( $user->isMetaDirty( 'foo' ), 'Meta should not be dirty after save.' );
 		
 		$user->foo = 'baz';
 		
@@ -92,6 +92,7 @@ class MetableTest extends TestCase
 		$this->assertEquals( 'baz', is_null( $meta = $metaData->first() ) ? null : $meta->value, 'Fluent unsetter should not remove meta from database before save.' );
 		$this->assertEquals( 1, $metaData->count(), 'Fluent unsetter should not remove meta from database before save.' );
 		$this->assertFalse( isset( $user->foo ), 'Fluent meta should not be set before save.' );
+		$this->assertTrue( $user->isMetaDirty( 'foo' ), 'Meta should be dirty before save.' );
 		
 		$user->save();
 		
@@ -99,16 +100,25 @@ class MetableTest extends TestCase
 		$this->assertNull( $metaData->first(), 'Fluent unsetter did not remove meta from database.' );
 		$this->assertEquals( 0, $metaData->count(), 'Fluent unsetter did not remove meta from database.' );
 		$this->assertFalse( isset( $user->foo ), 'Fluent meta should not be set.' );
+		$this->assertFalse( $user->isMetaDirty( 'foo' ), 'Meta should not be dirty after save.' );
 		
 		$user->foo = 'bar';
 		$user->save();
+		
+		$user->bar = 'foo';
+		
+		$this->assertTrue( $user->isMetaDirty(), 'isMetaDirty should return true even if one of metas has changed' );
+		$this->assertTrue( $user->isMetaDirty( ['foo', 'bar'] ), 'isMetaDirty should return true even if one of metas has changed' );
+		$this->assertTrue( $user->isMetaDirty( 'foo', 'bar' ), 'isMetaDirty should return true even if one of metas has changed' );
+		$this->assertTrue( $user->isMetaDirty( 'foo,bar' ), 'isMetaDirty should return true even if one of metas has changed' );
+		
 		$user->delete();
 		
 		$this->assertEquals( 0, $metaData->count(), 'Meta should be deleted from database after deleting user.' );
 	}
 	
 	public function testDisableFluentMeta() {
-		$user = new User;
+		$user = new UserTest;
 		$user->disableFluentMeta = true;
 		
 		$user->foo = 'bar';
@@ -133,21 +143,21 @@ class MetableTest extends TestCase
 	}
 	
 	public function testScopes() {
-		$user1 = new User;
+		$user1 = new UserTest;
 		$user1->foo = 'bar';
 		$user1->save();
 		
-		$user2 = new User;
+		$user2 = new UserTest;
 		$user2->foo = 'baz';
 		$user2->save();
 		
-		$scope = User::meta()->where( 'users_meta.key', 'foo' )->where( 'users_meta.value', 'baz' );
+		$scope = UserTest::meta()->where( $user2->getMetaTable() . '.key', 'foo' )->where( $user2->getMetaTable() . '.value', 'baz' );
 		$user = $scope->first();
 		$this->assertEquals( $user2->getKey(), $user->getKey(), 'Meta scope found wrong user' );
 		$this->assertEquals( $user->foo, $user2->foo, 'Meta scope found wrong user' );
 		$this->assertNotNull( $user->metas, 'Metas relation should not be null' );
 		
-		$scope = User::whereMeta( 'foo', 'baz' );
+		$scope = UserTest::whereMeta( 'foo', 'baz' );
 		$user = $scope->first();
 		$this->assertEquals( $user2->getKey(), $user->getKey(), 'WhereMeta scope found wrong user' );
 		$this->assertEquals( $user->foo, $user2->foo, 'WhereMeta scope found wrong user' );
@@ -157,7 +167,7 @@ class MetableTest extends TestCase
 	}
 	
 	public function testDefaultMetaValues() {
-		$user = new User;
+		$user = new UserTest;
 		
 		$this->assertTrue( isset( $user->default_meta_key ), 'Default meta key should be set' );
 		$this->assertTrue( $user->hasDefaultMetaValue( 'default_meta_key' ), 'Default meta key should be set' );
@@ -167,7 +177,7 @@ class MetableTest extends TestCase
 		$this->assertEquals( 'foo', $user->default_meta_key, 'Default meta value should be changed' );
 		
 		$user->save();
-		$metaData = Capsule::table( 'users_meta' )->where( $user->getMetaKeyName(), $user->getKey() )->where( 'key', 'default_meta_key' );
+		$metaData = Capsule::table( $user->getMetaTable() )->where( $user->getMetaKeyName(), $user->getKey() )->where( 'key', 'default_meta_key' );
 		
 		$this->assertEquals( 'foo', is_null( $meta = $metaData->first() ) ? null : $meta->value, 'Default value should be changed in database.' );
 		
@@ -190,7 +200,7 @@ class MetableTest extends TestCase
 	}
 	
 	public function testAccessorAndMutator() {
-		$user = new User;
+		$user = new UserTest;
 		
 		$this->assertTrue( isset( $user->accessor ), 'Meta accessor key should be set' );
 		$this->assertEquals( 'accessed_', $user->accessor, 'Meta accessor value should be set' );
@@ -205,7 +215,7 @@ class MetableTest extends TestCase
 	}
 	
 	public function testMetaMethods() {
-		$user = new User;
+		$user = new UserTest;
 		
 		$user->setMeta( 'foo', 'bar' );
 		$this->assertEquals( 'bar', $user->getMeta( 'foo' ), 'Meta method getMeta did not return correct value' );
@@ -218,7 +228,7 @@ class MetableTest extends TestCase
 		$user->save();
 		
 		// re retrieve user to make sure meta is saved
-		$user = User::with( ['metas'] )->find( $user->getKey() );
+		$user = UserTest::with( ['metas'] )->find( $user->getKey() );
 		
 		$this->assertTrue( $user->relationLoaded( 'metas' ), 'Metas relation should be loaded' );
 		
@@ -254,7 +264,7 @@ class MetableTest extends TestCase
 	}
 	
 	public function testDefaultParameterInGetMeta() {
-		$user = new User;
+		$user = new UserTest;
 		
 		$this->assertEquals( 'default_value', $user->getMeta( 'foo', 'default_value' ), 'Default parameter should be returned when meta is null' );
 		$this->assertSame( ['foo' => 'foo_value', 'bar' => 'bar_value'], $user->getMeta( ['foo', 'bar'], ['foo' => 'foo_value', 'bar' => 'bar_value'] )->toArray(), 'Default parameter should be returned when meta is null' );
@@ -266,13 +276,13 @@ class MetableTest extends TestCase
 	}
 	
 	public function testHasColumn() {
-		$user = new User;
+		$user = new UserTest;
 		$this->assertTrue( $user->hasColumn( 'name' ), 'User does not have "name" column' );
 		$this->assertFalse( $user->hasColumn( 'foo' ), 'User should not have "foo" column' );
 	}
 	
 	public function testHideMeta() {
-		$user = new User;
+		$user = new UserTest;
 		$user->setMeta( 'foo', 'bar' );
 		$user->hideMeta = false;
 		
@@ -285,7 +295,7 @@ class MetableTest extends TestCase
 	}
 	
 	public function testMetaDataTypeStoredCorrectly() {
-		$user = new User;
+		$user = new UserTest;
 		$user->setMeta( 'string', 'string' );
 		$user->setMeta( 'integer', 1 );
 		$user->setMeta( 'double', 1.1 );
@@ -295,12 +305,12 @@ class MetableTest extends TestCase
 		$user->setMeta( 'null' );
 		$user->setMeta( 'datetime', new DateTime );
 		
-		$user2 = new User;
+		$user2 = new UserTest;
 		$user2->save();
 		$user->setMeta( 'model', $user2 );
 		$user->save();
 		// reload user
-		$user = User::find( $user->id );
+		$user = UserTest::find( $user->id );
 		
 		$this->assertEquals( 'string', $user->getMetaData()->get( 'string' )->type );
 		$this->assertEquals( 'string', gettype( $user->getMeta( 'string' ) ) );
@@ -327,7 +337,7 @@ class MetableTest extends TestCase
 		$this->assertInstanceOf( DateTime::class, $user->getMeta( 'datetime' ) );
 		
 		$this->assertEquals( 'model', $user->getMetaData()->get( 'model' )->type );
-		$this->assertInstanceOf( User::class, $user->getMeta( 'model' ) );
+		$this->assertInstanceOf( UserTest::class, $user->getMeta( 'model' ) );
 		$this->assertEquals( $user2->id, $user->getMeta( 'model' )->id );
 		
 		$hash1 = spl_object_hash( $user->getMeta( 'model' ) );
@@ -336,7 +346,7 @@ class MetableTest extends TestCase
 		
 		$user2->delete();
 		// reload user
-		$user = User::find( $user->id );
+		$user = UserTest::find( $user->id );
 		
 		$this->expectException( ModelNotFoundException::class );
 		$user->getMeta( 'model' );
