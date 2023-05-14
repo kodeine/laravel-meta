@@ -15,6 +15,7 @@ trait Metable
 	
 	protected $__metaData = null;
 	protected $__wasCreatedEventFired = false;
+	protected $__wasUpdatedEventFired = false;
 	
 	/**
 	 * whereMeta scope for easier join
@@ -345,6 +346,11 @@ trait Metable
 			$this->__wasCreatedEventFired = false;
 			$this->fireModelEvent( 'createdWithMetas', false );
 		}
+		
+		if ( $this->__wasUpdatedEventFired ) {
+			$this->__wasUpdatedEventFired = false;
+			$this->fireModelEvent( 'updatedWithMetas', false );
+		}
 	}
 	
 	protected function fireMetaEvent($event, $metaName, bool $halt = true) {
@@ -539,16 +545,25 @@ trait Metable
 		static::created( function ($model) {
 			$model->__wasCreatedEventFired = true;
 		} );
+		
+		static::updated( function ($model) {
+			$model->__wasUpdatedEventFired = true;
+		} );
 	
 	protected function initializeMetable() {
 		$this->observables = array_merge( $this->observables, [
 			'createdWithMetas',
+			'updatedWithMetas',
 		] );
 		$this->observables = array_unique( $this->observables );
 	}
 	
 	public static function createdWithMetas($callback) {
 		static::registerModelEvent( 'createdWithMetas', $callback );
+	}
+	
+	public static function updatedWithMetas($callback) {
+		static::registerModelEvent( 'updatedWithMetas', $callback );
 	}
 	}
 	
