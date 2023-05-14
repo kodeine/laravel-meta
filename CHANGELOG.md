@@ -1,5 +1,17 @@
 # Release Notes
 
+## v2.2.0
+
+### Added
+
+* Added `createdWithMetas`, `updatedWithMetas`, `savedWithMetas` events.
+
+## v2.1.1
+
+### Added
+
+* Added Laravel 10.x Compatibility.
+
 ## v2.1.0
 
 ### Added
