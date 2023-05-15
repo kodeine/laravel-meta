@@ -12,7 +12,7 @@ class BaseEventTest
 	public $model;
 	public $meta;
 	
-	public function __construct(EventTest $model, $meta) {
+	public function __construct(EventTest $model, $meta = null) {
 		$this->model = $model;
 		$this->meta = $meta;
 	}

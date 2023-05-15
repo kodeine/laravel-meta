@@ -16,6 +16,9 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 use Kodeine\Metable\Tests\Observers\EventObserver;
 use Kodeine\Metable\Tests\Events\MetaDeletingTestEvent;
 use Kodeine\Metable\Tests\Events\MetaCreatingTestEvent;
+use Kodeine\Metable\Tests\Events\SavedWithMetasTestEvent;
+use Kodeine\Metable\Tests\Events\CreatedWithMetasTestEvent;
+use Kodeine\Metable\Tests\Events\UpdatedWithMetasTestEvent;
 use Kodeine\Metable\Tests\Listeners\HandleMetaSavedTestEvent;
 use Kodeine\Metable\Tests\Listeners\HandleMetaSavingTestEvent;
 use Kodeine\Metable\Tests\Listeners\HandleMetaCreatedTestEvent;
@@ -24,6 +27,9 @@ use Kodeine\Metable\Tests\Listeners\HandleMetaDeletedTestEvent;
 use Kodeine\Metable\Tests\Listeners\HandleMetaUpdatingTestEvent;
 use Kodeine\Metable\Tests\Listeners\HandleMetaDeletingTestEvent;
 use Kodeine\Metable\Tests\Listeners\HandleMetaCreatingTestEvent;
+use Kodeine\Metable\Tests\Listeners\HandleSavedWithMetasTestEvent;
+use Kodeine\Metable\Tests\Listeners\HandleCreatedWithMetasTestEvent;
+use Kodeine\Metable\Tests\Listeners\HandleUpdatedWithMetasTestEvent;
 
 class HasMetaEventsTest extends TestCase
 {
@@ -85,6 +91,15 @@ class HasMetaEventsTest extends TestCase
 			],
 			MetaDeletedTestEvent::class => [
 				HandleMetaDeletedTestEvent::class,
+			],
+			CreatedWithMetasTestEvent::class => [
+				HandleCreatedWithMetasTestEvent::class,
+			],
+			UpdatedWithMetasTestEvent::class => [
+				HandleUpdatedWithMetasTestEvent::class,
+			],
+			SavedWithMetasTestEvent::class => [
+				HandleSavedWithMetasTestEvent::class,
 			],
 		];
 		foreach ($listen as $event => $listeners) {
@@ -465,6 +480,126 @@ class HasMetaEventsTest extends TestCase
 		$this->assertEquals( 'bar', is_null( $meta = $metaData->first() ) ? null : $meta->value, "Meta should not be removed" );
 		
 		$event->listenerShouldReturnFalse['metaDeleting'] = false;
+		$event->delete();
+	}
+	
+	public function testCreatedWithMetasEvent() {
+		$eventName = 'createdWithMetas';
+		$event = new EventTest;
+		
+		$this->assertContains( $eventName, $event->getObservableEvents(), "$eventName event should be observable" );
+		
+		EventTest::creating( function () {
+			static $fired = false;//make sure event listener fired only once
+			if ( ! $fired ) {
+				$fired = true;
+				return false;
+			}
+			return true;
+		} );
+		
+		$event->foo = 'bar';
+		$event->save();//the creating event in above should prevent model saving process
+		
+		$this->assertEmpty( $event->listenersChanges[$eventName] ?? [], "$eventName event should not be fired" );
+		$this->assertEmpty( $event->observersChanges[$eventName] ?? [], "$eventName event should not be fired" );
+		$this->assertEmpty( $event->classListenersChanges[$eventName] ?? [], "$eventName event should not be fired" );
+		$this->assertFalse( $event->exists, "model should not be saved" );
+		
+		$event->save();//the creating event in above should have no affect
+		
+		$this->assertCount( 1, $event->listenersChanges[$eventName] ?? [], "$eventName event should be fired only once" );
+		$this->assertCount( 1, $event->observersChanges[$eventName] ?? [], "$eventName event should be fired by observer only once" );
+		$this->assertCount( 1, $event->classListenersChanges[$eventName] ?? [], "$eventName event should be fired by class listener only once" );
+		
+		$event->bar = 'bar';
+		
+		$event->save();//model already created. so everything should be the same
+		
+		$this->assertCount( 1, $event->listenersChanges[$eventName] ?? [], "$eventName event should be fired only once" );
+		$this->assertCount( 1, $event->observersChanges[$eventName] ?? [], "$eventName event should be fired by observer only once" );
+		$this->assertCount( 1, $event->classListenersChanges[$eventName] ?? [], "$eventName event should be fired by class listener only once" );
+		
+		$event->delete();
+	}
+	
+	public function testUpdatedWithMetasEvent() {
+		$eventName = 'updatedWithMetas';
+		$event = new EventTest;
+		
+		$this->assertContains( $eventName, $event->getObservableEvents(), "$eventName event should be observable" );
+		
+		$event->foo = 'bar';
+		$event->save();
+		
+		$this->assertEmpty( $event->listenersChanges[$eventName] ?? [], "$eventName event should not be fired" );
+		$this->assertEmpty( $event->observersChanges[$eventName] ?? [], "$eventName event should not be fired" );
+		$this->assertEmpty( $event->classListenersChanges[$eventName] ?? [], "$eventName event should not be fired" );
+		
+		$event->name = 'foo';
+		$event->save();
+		
+		$this->assertCount( 1, $event->listenersChanges[$eventName] ?? [], "$eventName event should be fired only once" );
+		$this->assertCount( 1, $event->observersChanges[$eventName] ?? [], "$eventName event should be fired by observer only once" );
+		$this->assertCount( 1, $event->classListenersChanges[$eventName] ?? [], "$eventName event should be fired by class listener only once" );
+		
+		EventTest::updating( function () {
+			static $fired = false;//make sure event listener fired only once
+			if ( ! $fired ) {
+				$fired = true;
+				return false;
+			}
+			return true;
+		} );
+		
+		$event->name = 'bar';
+		
+		$event->save();//the updating event in above should prevent model updating process
+		
+		$this->assertCount( 1, $event->listenersChanges[$eventName] ?? [], "$eventName event should be fired only once" );
+		$this->assertCount( 1, $event->observersChanges[$eventName] ?? [], "$eventName event should be fired by observer only once" );
+		$this->assertCount( 1, $event->classListenersChanges[$eventName] ?? [], "$eventName event should be fired by class listener only once" );
+		
+		$event->delete();
+	}
+	
+	public function testSavedWithMetasEvent() {
+		$eventName = 'savedWithMetas';
+		$event = new EventTest;
+		
+		$this->assertContains( $eventName, $event->getObservableEvents(), "$eventName event should be observable" );
+		
+		EventTest::saving( function () {
+			static $fired = false;//make sure event listener fired only once
+			if ( ! $fired ) {
+				$fired = true;
+				return false;
+			}
+			return true;
+		} );
+		
+		$event->foo = 'bar';
+		$event->save();//the saving event in above should prevent model saving process
+		
+		$this->assertEmpty( $event->listenersChanges[$eventName] ?? [], "$eventName event should not be fired" );
+		$this->assertEmpty( $event->observersChanges[$eventName] ?? [], "$eventName event should not be fired" );
+		$this->assertEmpty( $event->classListenersChanges[$eventName] ?? [], "$eventName event should not be fired" );
+		$this->assertFalse( $event->exists, "model should not be saved" );
+		
+		$event->save();//the saving event in above should have no affect
+		
+		$this->assertCount( 1, $event->listenersChanges[$eventName] ?? [], "$eventName event should be fired only once" );
+		$this->assertCount( 1, $event->observersChanges[$eventName] ?? [], "$eventName event should be fired by observer only once" );
+		$this->assertCount( 1, $event->classListenersChanges[$eventName] ?? [], "$eventName event should be fired by class listener only once" );
+		
+		$event->name = 'foo';
+		
+		$event->save();
+		
+		$this->assertCount( 2, $event->listenersChanges[$eventName] ?? [], "$eventName event should be fired twice" );
+		$this->assertCount( 2, $event->observersChanges[$eventName] ?? [], "$eventName event should be fired by observer twice" );
+		$this->assertCount( 2, $event->classListenersChanges[$eventName] ?? [], "$eventName event should be fired by class listener twice" );
+		
 		$event->delete();
 	}
 }

@@ -38,6 +38,18 @@ class EventObserver
 		return $this->genericObserver( $model, $meta, __FUNCTION__ );
 	}
 	
+	public function createdWithMetas(EventTest $model) {
+		return $this->genericObserver( $model, null, __FUNCTION__ );
+	}
+	
+	public function updatedWithMetas(EventTest $model) {
+		return $this->genericObserver( $model, null, __FUNCTION__ );
+	}
+	
+	public function savedWithMetas(EventTest $model) {
+		return $this->genericObserver( $model, null, __FUNCTION__ );
+	}
+	
 	protected function genericObserver(EventTest $model, $meta, $eventName) {
 		if ( ! isset( $model->observersChanges[$eventName] ) ) {
 			$model->observersChanges[$eventName] = [];

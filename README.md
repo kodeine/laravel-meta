@@ -430,6 +430,12 @@ After that, you can listen for events the [same way](https://laravel.com/docs/ma
 
 > If you `return false;` in listener of any event ending with `ing`, that operation will be aborted.
 
+### Additional events
+
+There are some additional events that extend existing laravel events. These events don't need `HasMetaEvents` trait and like default laravel events, the event listeners should expect one parameter.
+Event names: `createdWithMetas`, `updatedWithMetas`, `savedWithMetas`. These events fire exactly like default laravel events except that they are only fired after all metas saved to database.
+For example, you may need to access metas inside a queue job after model created. But because metas have not been saved to database yet (metas will be saved to database in `saved` event and this event has not been fired yet), job can't access them. by using `createdWithMetas` event instead of `created` event, the problem will be solved.
+
 There are 3 ways to listen for events:
 
 #### 1. By Defining `$dispatchesEvents` Property

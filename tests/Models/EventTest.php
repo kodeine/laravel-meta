@@ -9,11 +9,14 @@ use Illuminate\Database\Eloquent\Model;
 use Kodeine\Metable\Tests\Events\MetaSavedTestEvent;
 use Kodeine\Metable\Tests\Events\MetaSavingTestEvent;
 use Kodeine\Metable\Tests\Events\MetaCreatedTestEvent;
+use Kodeine\Metable\Tests\Events\SavedWithMetasTestEvent;
+use Kodeine\Metable\Tests\Events\CreatedWithMetasTestEvent;
 use Kodeine\Metable\Tests\Events\MetaUpdatedTestEvent;
 use Kodeine\Metable\Tests\Events\MetaDeletedTestEvent;
 use Kodeine\Metable\Tests\Events\MetaUpdatingTestEvent;
 use Kodeine\Metable\Tests\Events\MetaDeletingTestEvent;
 use Kodeine\Metable\Tests\Events\MetaCreatingTestEvent;
+use Kodeine\Metable\Tests\Events\UpdatedWithMetasTestEvent;
 
 class EventTest extends Model
 {
@@ -35,6 +38,9 @@ class EventTest extends Model
 		'metaUpdated' => MetaUpdatedTestEvent::class,
 		'metaDeleting' => MetaDeletingTestEvent::class,
 		'metaDeleted' => MetaDeletedTestEvent::class,
+		'createdWithMetas' => CreatedWithMetasTestEvent::class,
+		'updatedWithMetas' => UpdatedWithMetasTestEvent::class,
+		'savedWithMetas' => SavedWithMetasTestEvent::class,
 	];
 	
 	public static function boot() {
@@ -81,6 +87,18 @@ class EventTest extends Model
 		
 		static::metaDeleted( function (EventTest $model, $meta) use ($listener) {
 			return $listener( $model, $meta, 'metaDeleted' );
+		} );
+		
+		static::createdWithMetas( function (EventTest $model) use ($listener) {
+			return $listener( $model, null, 'createdWithMetas' );
+		} );
+		
+		static::updatedWithMetas( function (EventTest $model) use ($listener) {
+			return $listener( $model, null, 'updatedWithMetas' );
+		} );
+		
+		static::savedWithMetas( function (EventTest $model) use ($listener) {
+			return $listener( $model, null, 'savedWithMetas' );
 		} );
 	}
 }
