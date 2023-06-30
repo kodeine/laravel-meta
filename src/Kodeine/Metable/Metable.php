@@ -437,13 +437,17 @@ trait Metable
 			return $attr;
 		}
 		
-		// Check if the key is a casted attribute.
-		if ( $this->hasCast( $key ) ) {
-			return $this->castAttribute( $key, $attr );
-		}
-
 		// Don't get meta data if fluent access is disabled.
 		if ( property_exists( $this, 'disableFluentMeta' ) && $this->disableFluentMeta ) {
+			return $attr;
+		}
+		
+		// It is possible that attribute exists, or it has a cast, but it's null, so we check for that
+		if ( array_key_exists( $key, $this->attributes ) ||
+			array_key_exists( $key, $this->casts ) ||
+			$this->hasGetMutator( $key ) ||
+			$this->hasAttributeMutator( $key ) ||
+			$this->isClassCastable( $key ) ) {
 			return $attr;
 		}
 		
