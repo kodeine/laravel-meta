@@ -31,6 +31,7 @@ class MetableTest extends TestCase
 			$table->string( 'name' )->default( 'john' );
 			$table->string( 'email' )->default( 'john@doe.com' );
 			$table->string( 'password' )->nullable();
+			$table->string( 'state' )->nullable();
 			$table->integer( 'user_test_id' )->unsigned()->nullable();
 			$table->foreign( 'user_test_id' )->references( 'id' )->on( 'user_tests' );
 			$table->timestamps();
@@ -227,6 +228,10 @@ class MetableTest extends TestCase
 		
 		$user->save();
 		
+		// $meta = $user->getMeta();
+		// $this->assertInstanceOf( 'Illuminate\Support\Collection', $meta, 'Meta method getMeta is not typeof Collection' );
+		// $this->assertNotEmpty( $meta, 'Meta method getMeta did return empty collection' );
+
 		// re retrieve user to make sure meta is saved
 		$user = UserTest::with( ['metas'] )->find( $user->getKey() );
 		
