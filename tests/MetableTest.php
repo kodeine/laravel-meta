@@ -220,7 +220,7 @@ class MetableTest extends TestCase
 		
 		$user->setMeta( 'foo', 'bar' );
 		$this->assertEquals( 'bar', $user->getMeta( 'foo' ), 'Meta method getMeta did not return correct value' );
-		
+
 		$user->setMeta( [
 			'foo' => 'baz',
 			'bas' => 'bar',
@@ -228,9 +228,9 @@ class MetableTest extends TestCase
 		
 		$user->save();
 		
-		// $meta = $user->getMeta();
-		// $this->assertInstanceOf( 'Illuminate\Support\Collection', $meta, 'Meta method getMeta is not typeof Collection' );
-		// $this->assertNotEmpty( $meta, 'Meta method getMeta did return empty collection' );
+		$meta = $user->getMeta();
+		$this->assertInstanceOf( 'Illuminate\Support\Collection', $meta, 'Meta method getMeta is not typeof Collection' );
+		$this->assertNotEmpty( $meta, 'Meta method getMeta did return empty collection' );
 
 		// re retrieve user to make sure meta is saved
 		$user = UserTest::with( ['metas'] )->find( $user->getKey() );
