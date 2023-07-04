@@ -21,10 +21,14 @@ class UserTest extends Model
 	public $hideMeta = false;
 	
 	public $disableFluentMeta = false;
-
+	
 	protected $casts = [
 		'state' => UserCastedObject::class,
 	];
+	
+	public function getNullCastAttribute() {
+		return null;
+	}
 	
 	/**
 	 * This is dummy relation to itself.
