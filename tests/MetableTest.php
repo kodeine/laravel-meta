@@ -52,14 +52,14 @@ class MetableTest extends TestCase
 	
 	public function testCast() {
 		$user = new UserTest;
-
+		
 		$this->assertNull( $user->state, 'Casted object should be null by default' );
-
+		
 		$user->state = DefaultState::class;
-
-		$this->assertTrue( $user->state instanceof DefaultState, 'Casted object should be instanceof DefaultState' );		
+		
+		$this->assertInstanceOf( DefaultState::class, $user->state, 'Casted object should be instanceof DefaultState' );
 	}
-
+	
 	public function testFluentMeta() {
 		$user = new UserTest;
 		

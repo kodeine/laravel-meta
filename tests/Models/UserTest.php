@@ -21,7 +21,7 @@ class UserTest extends Model
 	public $hideMeta = false;
 	
 	public $disableFluentMeta = false;
-
+	
 	protected $casts = [
 		'state' => State::class,
 	];
