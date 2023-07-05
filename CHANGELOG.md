@@ -1,5 +1,11 @@
 # Release Notes
 
+## v2.2.1
+
+### Fixed
+
+* Fixed a bug that was caused by a null value or a null cast. [PR #104](https://github.com/kodeine/laravel-meta/pull/104)
+
 ## v2.2.0
 
 ### Added

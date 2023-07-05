@@ -10,6 +10,7 @@ use PHPUnit\Framework\TestCase;
 use Kodeine\Metable\Tests\Models\UserTest;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Kodeine\Metable\Tests\Casts\UserState\DefaultState;
 
 class MetableTest extends TestCase
 {
@@ -31,6 +32,8 @@ class MetableTest extends TestCase
 			$table->string( 'name' )->default( 'john' );
 			$table->string( 'email' )->default( 'john@doe.com' );
 			$table->string( 'password' )->nullable();
+			$table->string( 'state' )->nullable();
+			$table->string( 'null_value' )->nullable();
 			$table->integer( 'user_test_id' )->unsigned()->nullable();
 			$table->foreign( 'user_test_id' )->references( 'id' )->on( 'user_tests' );
 			$table->timestamps();
@@ -45,6 +48,16 @@ class MetableTest extends TestCase
 			
 			$table->timestamps();
 		} );
+	}
+	
+	public function testCast() {
+		$user = new UserTest;
+		
+		$this->assertNull( $user->state, 'Casted object should be null by default' );
+		
+		$user->state = DefaultState::class;
+		
+		$this->assertInstanceOf( DefaultState::class, $user->state, 'Casted object should be instanceof DefaultState' );
 	}
 	
 	public function testFluentMeta() {
@@ -111,6 +124,21 @@ class MetableTest extends TestCase
 		$this->assertTrue( $user->isMetaDirty( ['foo', 'bar'] ), 'isMetaDirty should return true even if one of metas has changed' );
 		$this->assertTrue( $user->isMetaDirty( 'foo', 'bar' ), 'isMetaDirty should return true even if one of metas has changed' );
 		$this->assertTrue( $user->isMetaDirty( 'foo,bar' ), 'isMetaDirty should return true even if one of metas has changed' );
+		
+		//re retrieve user from database
+		/** @var UserTest $user */
+		$user = UserTest::find( $user->id );
+		
+		$this->assertNull( $user->null_value, 'null_value property should be null' );
+		$this->assertNull( $user->null_cast, 'null_cast property should be null' );
+		
+		$user->setMeta( 'null_value', true );
+		$user->setMeta( 'null_cast', true );
+		
+		$this->assertTrue( $user->getMeta( 'null_value' ), 'Meta should be set' );
+		$this->assertTrue( $user->getMeta( 'null_cast' ), 'Meta should be set' );
+		$this->assertNull( $user->null_value, 'null_value property should be null' );
+		$this->assertNull( $user->null_cast, 'null_cast property should be null' );
 		
 		$user->delete();
 		
@@ -226,6 +254,10 @@ class MetableTest extends TestCase
 		] );
 		
 		$user->save();
+		
+		$meta = $user->getMeta();
+		$this->assertInstanceOf( 'Illuminate\Support\Collection', $meta, 'Meta method getMeta is not typeof Collection' );
+		$this->assertTrue( $meta->isNotEmpty(), 'Meta method getMeta did return empty collection' );
 		
 		// re retrieve user to make sure meta is saved
 		$user = UserTest::with( ['metas'] )->find( $user->getKey() );

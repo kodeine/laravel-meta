@@ -442,6 +442,15 @@ trait Metable
 			return $attr;
 		}
 		
+		// It is possible that attribute exists, or it has a cast, but it's null, so we check for that
+		if ( array_key_exists( $key, $this->attributes ) ||
+			array_key_exists( $key, $this->casts ) ||
+			$this->hasGetMutator( $key ) ||
+			$this->hasAttributeMutator( $key ) ||
+			$this->isClassCastable( $key ) ) {
+			return $attr;
+		}
+		
 		// If key is a relation name, then return parent value.
 		// The reason for this is that it's possible that the relation does not exist and parent call returns null for that.
 		if ( $this->isRelation( $key ) && $this->relationLoaded( $key ) ) {
