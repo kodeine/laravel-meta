@@ -10,6 +10,7 @@ use PHPUnit\Framework\TestCase;
 use Kodeine\Metable\Tests\Models\UserTest;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Kodeine\Metable\Tests\Casts\UserState\DefaultState;
 
 class MetableTest extends TestCase
 {
@@ -49,6 +50,16 @@ class MetableTest extends TestCase
 		} );
 	}
 	
+	public function testCast() {
+		$user = new UserTest;
+
+		$this->assertNull( $user->state, 'Casted object should be null by default' );
+
+		$user->state = DefaultState::class;
+
+		$this->assertTrue( $user->state instanceof DefaultState, 'Casted object should be instanceof DefaultState' );		
+	}
+
 	public function testFluentMeta() {
 		$user = new UserTest;
 		

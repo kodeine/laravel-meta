@@ -3,22 +3,43 @@
 namespace Kodeine\Metable\Tests\Casts;
 
 use Illuminate\Contracts\Database\Eloquent\Castable;
-use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 
-class UserCastedObject implements Castable, CastsAttributes
+abstract class UserCastedObject implements Castable
 {
-	public $description;
-	
-	public function get($model, $key, $value, $attributes) {
-		if ( is_null( $value ) ) return null;
-		return json_decode( $value, true );
+	public function __construct($model) {
+		$this->model = $model;
+		$this->stateConfig = static::config();
 	}
-	
-	public function set($model, $key, $value, $attributes) {
-		return [$key => json_encode( $value )];
+
+	public static function config()
+	{
+		return [
+			'default' => null,
+		];
 	}
 	
 	public static function castUsing(array $arguments) {
-		return new self();
+		return new StateCaster(static::class);
+	}
+
+    public function setField(string $field): self
+    {
+        $this->field = $field;
+
+        return $this;
+    }
+
+    public static function getMorphClass(): string
+    {
+        return static::$name ?? static::class;
+    }
+
+	public function make(string $name, $model)
+	{
+		if (is_null($name)) {
+			return null;
+		}
+
+		return new $name($model);
 	}
 }
