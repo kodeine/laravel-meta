@@ -22,9 +22,9 @@ trait Metable
 	 * whereMeta scope for easier join
 	 * -------------------------
 	 */
-	public function scopeWhereMeta($query, $key, $value, $alias = null) {
+	public function scopeWhereMeta($query, $key, $value, $alias = null, $operator = '=') {
 		$alias = (empty( $alias )) ? $this->getMetaTable() : $alias;
-		return $query->join( $this->getMetaTable() . ' AS ' . $alias, $this->getQualifiedKeyName(), '=', $alias . '.' . $this->getMetaKeyName() )->where( $alias . '.key', '=', $key )->where( $alias . '.value', '=', $value )->select( $this->getTable() . '.*' );
+		return $query->join( $this->getMetaTable() . ' AS ' . $alias, $this->getQualifiedKeyName(), '=', $alias . '.' . $this->getMetaKeyName() )->where( $alias . '.key', '=', $key )->where( $alias . '.value', $operator, $value )->select( $this->getTable() . '.*' );
 	}
 	
 	/**
