@@ -22,9 +22,9 @@
     ],
     "require": {
         "php": ">=7.3",
-        "illuminate/support": "^8.0|^9.0|^10.0",
-        "illuminate/database": "^8.0|^9.0|^10.0",
-        "illuminate/events": "^8.0|^9.0|^10.0",
+        "illuminate/support": "^8.0|^9.0|^10.0|^11.0",
+        "illuminate/database": "^8.0|^9.0|^10.0|^11.0",
+        "illuminate/events": "^8.0|^9.0|^10.0|^11.0",
         "ext-json": "*"
     },
     "autoload": {
@@ -41,6 +41,6 @@
     "minimum-stability": "stable",
     "license": "MIT",
     "require-dev": {
-        "phpunit/phpunit": "^9.5"
+        "phpunit/phpunit": "^9.5|^10.5"
     }
 }
