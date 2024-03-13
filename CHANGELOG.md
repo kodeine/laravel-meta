@@ -1,5 +1,17 @@
 # Release Notes
 
+## v2.2.3
+
+### Added
+
+* Added Laravel 11.x Compatibility
+
+## v2.2.2
+
+### Added
+
+* Added optional operator to whereMeta scope
+
 ## v2.2.1
 
 ### Fixed
