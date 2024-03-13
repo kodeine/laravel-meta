@@ -226,7 +226,7 @@ Or `set multiple metas and columns` at once:
 ```php
 ...
 $post->setAttributes([
-    'name' => 'hello world'; // model attribute
+    'name' => 'hello world', // model attribute
     'content' => 'Some content here',
     'views' => 1,
 ]);
