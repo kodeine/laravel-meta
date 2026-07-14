@@ -1,5 +1,11 @@
 # Release Notes
 
+## v2.2.6
+
+### Added
+
+* Added Laravel 13.x Compatibility
+
 ## v2.2.5
 
 ### Added
